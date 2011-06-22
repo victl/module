@@ -35,8 +35,10 @@ struct SharedMetaData
 	MetaCameraC_t s_cameraC;
 	MetaAslPoints_t s_aslPts[2];
 	MetaAslObjects_t s_aslObjs[2];
-	bool isValid[10];
-	pthread_spinlock_t locks[10];
+	MetaHokuyoPoints_t s_hokuyoPts[2];
+	MetaHokuyoObjects_t s_hokuyoObjs[2];
+	bool isValid[14];
+	pthread_spinlock_t locks[14];
 };
 
 struct SharedRecoData

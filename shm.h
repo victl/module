@@ -41,6 +41,7 @@ public:
 	 *
 	 * Index: 0~2 BW Camera
 	 *        0,1 Ibeo
+	 *        0,1 Hokuyo
 	 */
 	virtual bool SetMetaData(const MetaData_t& data, int index = 0) = 0;
 	virtual bool GetMetaData(MetaData* data, int index = 0) const = 0;

@@ -28,6 +28,10 @@ namespace module
 #define ASL_MAX_POINTS 2000
 #define ASL_MAX_CONTOURPOINTS	16
 #define ASL_MAX_OBJECTS		64
+// Hokuyo meta data size
+#define HOKUYO_MAX_POINTS 1081
+#define HOKUYO_MAX_OBJECTS  20
+#define HOKUYO_MAX_CONTOURPOINTS 150
 
 
 /****************************************************
@@ -383,16 +387,68 @@ typedef struct MetaCameraC
 	unsigned char mdata[CCAM_IMAGE_SIZE];
 } MetaCameraC_t;
 
+// Hokuyo Meta Data
+typedef struct MetaHokuyoPoints
+{
+	long range[HOKUYO_MAX_POINTS];
+	long intensity[HOKUYO_MAX_POINTS];
+} MetaHokuyoPoints_t;
+
+typedef struct MetaHokuyoObjects
+{
+	unsigned int uNumberOfObjects; //Specified the number of objects which were transmitted.
+	unsigned int uSensorStatus; // Specified the status of the Laserscanner. {0: Error and; 1: already}
+
+	unsigned int uaObjectAge[HOKUYO_MAX_OBJECTS]; // Age of an object [Scans]
+	unsigned int uaTrackingNumber[ASL_MAX_OBJECTS]; // For the life of an object constant number.
+
+	/**
+	 * Shows the status of an object.
+	 *
+	 * There are 3 possible states:
+	 *	- 0: known object (the object is older than 1 scan),
+	 *	- 1: unknown object (the object was seen the 1st time) and
+	 *	- 255: the information isn't available.
+	 */
+	unsigned int uaTrackingStatus[HOKUYO_MAX_OBJECTS];
+
+	unsigned int uaNumberOfPoints[HOKUYO_MAX_OBJECTS]; // Number of contour-points which describe the outline of an object.
+
+	double daPointNumberPosX[HOKUYO_MAX_OBJECTS][HOKUYO_MAX_CONTOURPOINTS]; // Relative position in x-direction [m].
+	double daPointNumberPosY[HOKUYO_MAX_OBJECTS][HOKUYO_MAX_CONTOURPOINTS]; // Relative position in Y-direction [m].
+
+	bool baVelocityXValid[HOKUYO_MAX_OBJECTS];
+	double daVelocityX[HOKUYO_MAX_OBJECTS]; // Relative velocity in x-direction [m/s]
+
+	bool baVelocityYValid[HOKUYO_MAX_OBJECTS];
+	double daVelocityY[HOKUYO_MAX_OBJECTS]; // Relative velocity in y-direction [m/s]
+
+	bool baPositionXsigmaValid[HOKUYO_MAX_OBJECTS];
+	double daPositionXsigma[HOKUYO_MAX_OBJECTS]; // Standard deviation of value daPositionX
+
+	bool baPositionYsigmaValid[HOKUYO_MAX_OBJECTS];
+	double daPositionYsigma[HOKUYO_MAX_OBJECTS]; // Standard deviation of value daPositionY
+
+	bool baVelocityXsigmaValid[HOKUYO_MAX_OBJECTS];
+	double daVelocityXsigma[HOKUYO_MAX_OBJECTS]; // Standard deviation of value daVelocityX
+
+	bool baVelocityYsigmaValid[HOKUYO_MAX_OBJECTS];
+	double daVelocityYsigma[HOKUYO_MAX_OBJECTS]; // Standard deviation of value daVelocityY
+
+} MetaHokuyoObjects_t;
+
 typedef struct MetaData
 {
 	enum
 	{
-		META_LASER_HDL   = 1,
-		META_CAMERA_BW   = 2,
-		META_CAMERA_C    = 3,
-		META_NAVIGATION  = 4,
-		META_ASL_POINTS  = 5,
-		META_ASL_OBJECTS = 6
+		META_LASER_HDL      = 1,
+		META_CAMERA_BW      = 2,
+		META_CAMERA_C       = 3,
+		META_NAVIGATION     = 4,
+		META_ASL_POINTS     = 5,
+		META_ASL_OBJECTS    = 6,
+		META_HOKUYO_POINTS  = 7,
+		META_HOKUYO_OBJECTS = 8
 	} type;
 
 	union
@@ -403,6 +459,8 @@ typedef struct MetaData
 		MetaCameraC_t v_cameraC;
 		MetaAslPoints_t v_aslPts;
 		MetaAslObjects_t v_aslObjs;
+		MetaHokuyoPoints_t v_hokuyoPts;
+		MetaHokuyoObjects_t v_hokuyoObjs;
 	} value;
 	struct timeval timestamp;
 

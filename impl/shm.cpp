@@ -94,6 +94,28 @@ bool SharedObjectsImpl::SetMetaData(const MetaData_t& data, int index)
 		}
 		else
 			return false;
+	case MetaData::META_HOKUYO_POINTS:
+		if(index >= 0 && index <= 1)
+		{
+			pthread_spin_lock(&m_addr->shm_metaData.locks[10 + index]);
+			memcpy(&m_addr->shm_metaData.s_hokuyoPts[index], &data.value.v_hokuyoPts, sizeof(MetaHokuyoPoints_t));
+			m_addr->shm_metaData.isValid[10 + index] = true;
+			pthread_spin_unlock(&m_addr->shm_metaData.locks[10 + index]);
+			return true;
+		}
+		else
+			return false;
+	case MetaData::META_HOKUYO_OBJECTS:
+		if(index >= 0 && index <= 1)
+		{
+			pthread_spin_lock(&m_addr->shm_metaData.locks[12 + index]);
+			memcpy(&m_addr->shm_metaData.s_hokuyoObjs[index], &data.value.v_hokuyoObjs, sizeof(MetaHokuyoObjects_t));
+			m_addr->shm_metaData.isValid[12 + index] = true;
+			pthread_spin_unlock(&m_addr->shm_metaData.locks[12 + index]);
+			return true;
+		}
+		else
+			return false;
 	default:
 		return false;
 	};
@@ -167,6 +189,32 @@ bool SharedObjectsImpl::GetMetaData(MetaData_t* data, int index) const
 			else
 				result = false;
 			pthread_spin_unlock(&m_addr->shm_metaData.locks[8 + index]);
+		}
+		else
+			result = false;
+		break;
+	case MetaData::META_HOKUYO_POINTS:
+		if(index >= 0 && index <= 1)
+		{
+			pthread_spin_lock(&m_addr->shm_metaData.locks[10 + index]);
+			if(m_addr->shm_metaData.isValid[10 + index])
+				memcpy(&data->value.v_hokuyoPts, &m_addr->shm_metaData.s_hokuyoPts[index], sizeof(MetaHokuyoPoints_t));
+			else
+				result = false;
+			pthread_spin_unlock(&m_addr->shm_metaData.locks[10 + index]);
+		}
+		else
+			result = false;
+		break;
+	case MetaData::META_HOKUYO_OBJECTS:
+		if(index >= 0 && index <= 1)
+		{
+			pthread_spin_lock(&m_addr->shm_metaData.locks[12 + index]);
+			if(m_addr->shm_metaData.isValid[12 + index])
+				memcpy(&data->value.v_hokuyoObjs, &m_addr->shm_metaData.s_hokuyoObjs[index], sizeof(MetaHokuyoObjects_t));
+			else
+				result = false;
+			pthread_spin_unlock(&m_addr->shm_metaData.locks[12 + index]);
 		}
 		else
 			result = false;

@@ -11,6 +11,9 @@ namespace utils
 class ConvertUtils
 {
 public:
+	/**
+	 * convert camera data to opencv's IplImage structure
+	 */
 	inline static IplImage* Convert(const MetaCameraBW_t& data);
 	inline static IplImage* Convert(const MetaCameraC_t& data);
 	inline static IplImage* Convert(const MarkerTaillightImage_t& data);

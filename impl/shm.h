@@ -59,8 +59,9 @@ struct SharedMarkers
 {
 	MarkerNavi_t s_navi;
 	MarkerIntersection_t s_intersection;
+	MarkerTaillightImage_t s_taillightImage;
 //	MarkerObstacle_t s_obstacle;
-	pthread_spinlock_t locks[2];
+	pthread_spinlock_t locks[3];
 };
 
 struct SharedMemory

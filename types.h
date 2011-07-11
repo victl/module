@@ -677,6 +677,14 @@ typedef struct MarkerIntersection
 	bool isIntersection;
 } MarkerIntersection_t;
 
+// taillight image
+typedef struct MarkerTaillightImage
+{
+	unsigned char imgdata[CCAM_IMAGE_SIZE];
+	int width;
+	int height;
+} MarkerTaillightImage_t;
+
 // obstacle
 //typedef struct MarkerObstacle
 //{
@@ -687,8 +695,9 @@ typedef struct MarkerData
 {
 	enum
 	{
-		MARKER_NAVIGATION   = 1,
-		MARKER_INTERSECTION = 2
+		MARKER_NAVIGATION      = 1,
+		MARKER_INTERSECTION    = 2,
+		MARKER_TAILLIGHT_IMAGE = 3
 //		MARKER_OBSTACLE     = 3
 	} type;
 
@@ -696,6 +705,7 @@ typedef struct MarkerData
 	{
 		MarkerNavi_t v_navi;
 		MarkerIntersection_t v_intersection;
+		MarkerTaillightImage_t v_taillightImage;
 //		MarkerObstacle_t v_obstacle;
 	} value;
 } MarkerData_t;

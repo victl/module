@@ -686,10 +686,10 @@ typedef struct MarkerTaillightImage
 } MarkerTaillightImage_t;
 
 // obstacle
-//typedef struct MarkerObstacle
-//{
-//	int marker;
-//} MarkerObstacle_t;
+typedef struct MarkerObstacle
+{
+	int marker;
+} MarkerObstacle_t;
 
 typedef struct MarkerData
 {
@@ -697,8 +697,8 @@ typedef struct MarkerData
 	{
 		MARKER_NAVIGATION      = 1,
 		MARKER_INTERSECTION    = 2,
-		MARKER_TAILLIGHT_IMAGE = 3
-//		MARKER_OBSTACLE     = 3
+		MARKER_TAILLIGHT_IMAGE = 3,
+		MARKER_OBSTACLE        = 4
 	} type;
 
 	union
@@ -706,7 +706,7 @@ typedef struct MarkerData
 		MarkerNavi_t v_navi;
 		MarkerIntersection_t v_intersection;
 		MarkerTaillightImage_t v_taillightImage;
-//		MarkerObstacle_t v_obstacle;
+		MarkerObstacle_t v_obstacle;
 	} value;
 } MarkerData_t;
 }

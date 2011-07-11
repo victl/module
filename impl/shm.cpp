@@ -388,11 +388,11 @@ bool SharedObjectsImpl::SetMarker(const MarkerData_t& data)
 		memcpy(&m_addr->shm_markers.s_taillightImage, &data.value.v_taillightImage, sizeof(MarkerTaillightImage_t));
 		pthread_spin_unlock(&m_addr->shm_markers.locks[2]);
 		return true;
-//	case MarkerData::MARKER_OBSTACLE:
-//		pthread_spin_lock(&m_addr->shm_markers.locks[2]);
-//		memcpy(&m_addr->shm_markers.s_obstacle, &data.value.v_obstacle, sizeof(MarkerObstacle_t));
-//		pthread_spin_unlock(&m_addr->shm_markers.locks[2]);
-//		return true;
+	case MarkerData::MARKER_OBSTACLE:
+		pthread_spin_lock(&m_addr->shm_markers.locks[3]);
+		memcpy(&m_addr->shm_markers.s_obstacle, &data.value.v_obstacle, sizeof(MarkerObstacle_t));
+		pthread_spin_unlock(&m_addr->shm_markers.locks[3]);
+		return true;
 	default:
 		return false;
 	};
@@ -420,11 +420,11 @@ bool SharedObjectsImpl::GetMarker(MarkerData_t* data) const
 		memcpy(&data->value.v_taillightImage, &m_addr->shm_markers.s_taillightImage, sizeof(MarkerTaillightImage_t));
 		pthread_spin_unlock(&m_addr->shm_markers.locks[2]);
 		return true;
-//	case MARKER_OBSTACLE:
-//		pthread_spin_lock(&m_addr->shm_markers.locks[2]);
-//		memcpy(&data->value.v_obstacle, &m_addr->shm_markers.s_obstacle, sizeof(MarkerObstacle_t));
-//		pthread_spin_unlock(&m_addr->shm_markers.locks[2]);
-//		return true;
+	case MarkerData::MARKER_OBSTACLE:
+		pthread_spin_lock(&m_addr->shm_markers.locks[3]);
+		memcpy(&data->value.v_obstacle, &m_addr->shm_markers.s_obstacle, sizeof(MarkerObstacle_t));
+		pthread_spin_unlock(&m_addr->shm_markers.locks[3]);
+		return true;
 	default:
 		return false;
 	};

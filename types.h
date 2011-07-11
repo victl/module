@@ -677,7 +677,7 @@ typedef struct MarkerIntersection
 	bool isIntersection;
 } MarkerIntersection_t;
 
-// taillight image
+// taillight image: HDL => TailLight
 typedef struct MarkerTaillightImage
 {
 	unsigned char imgdata[CCAM_IMAGE_SIZE];
@@ -685,11 +685,19 @@ typedef struct MarkerTaillightImage
 	int height;
 } MarkerTaillightImage_t;
 
-// obstacle
+// ibeo <=> decision
 typedef struct MarkerObstacle
 {
 	int marker;
 } MarkerObstacle_t;
+
+// hokuyo->HDL
+typedef struct MarkerHokuyoObs // MarkerType=MARKER_HOKUYO_OBS
+{
+	bool left;
+	bool right;
+	bool back;
+} MarkerHokuyoObs_t;
 
 typedef struct MarkerData
 {
@@ -698,7 +706,8 @@ typedef struct MarkerData
 		MARKER_NAVIGATION      = 1,
 		MARKER_INTERSECTION    = 2,
 		MARKER_TAILLIGHT_IMAGE = 3,
-		MARKER_OBSTACLE        = 4
+		MARKER_OBSTACLE        = 4,
+		MARKER_HOKUYO_OBS      = 5
 	} type;
 
 	union
@@ -707,6 +716,7 @@ typedef struct MarkerData
 		MarkerIntersection_t v_intersection;
 		MarkerTaillightImage_t v_taillightImage;
 		MarkerObstacle_t v_obstacle;
+		MarkerHokuyoObs_t v_hokuyoobs;
 	} value;
 } MarkerData_t;
 }

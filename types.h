@@ -151,8 +151,16 @@ typedef struct AslPoint
 	unsigned int m_uEchoPulseWidth;
 } AslPoint_t;
 
+// Ibeo(ASL) Meta Data
 typedef struct MetaAslPoints
 {
+	unsigned short m_uScannerType;
+	unsigned short m_uECU;
+	unsigned int m_uTimestamp;
+	double m_dStartAngle;
+	double m_dEndAngle;
+	unsigned int m_uScanCounter;
+	unsigned int m_uPoints;
 	AslPoint_t pts[ASL_MAX_POINTS];
 } MetaAslPoints_t;
 
@@ -712,6 +720,23 @@ typedef struct MarkerHokuyoObs // MarkerType=MARKER_HOKUYO_OBS
 	bool back;
 } MarkerHokuyoObs_t;
 
+// car following: ibeo => decision
+typedef struct MarkerCarFollowing
+{
+	double xi[6];
+	double yi[6];
+	double vi[6];
+} MarkerCarFollowing_t;
+
+// velocity dec: ibeo => decision
+typedef struct MarkerVelocityDec
+{
+	double velocity;
+	double distance;
+	double angle;
+	bool isDo;
+} MarkerVelocityDec_t;
+
 typedef struct MarkerData
 {
 	enum
@@ -720,7 +745,9 @@ typedef struct MarkerData
 		MARKER_INTERSECTION    = 2,
 		MARKER_TAILLIGHT_IMAGE = 3,
 		MARKER_OBSTACLE        = 4,
-		MARKER_HOKUYO_OBS      = 5
+		MARKER_HOKUYO_OBS      = 5,
+		MARKER_CAR_FOLLOWING   = 6,
+		MARKER_VELOCITY_DEC    = 7
 	} type;
 
 	union
@@ -730,6 +757,8 @@ typedef struct MarkerData
 		MarkerTaillightImage_t v_taillightImage;
 		MarkerObstacle_t v_obstacle;
 		MarkerHokuyoObs_t v_hokuyoobs;
+		MarkerCarFollowing_t v_carFollowing;
+		MarkerVelocityDec_t v_velocityDec;
 	} value;
 } MarkerData_t;
 }

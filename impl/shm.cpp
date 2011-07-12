@@ -439,6 +439,16 @@ bool SharedObjectsImpl::SetMarker(const MarkerData_t& data)
 		memcpy(&m_addr->shm_markers.s_hokuyoobs, &data.value.v_hokuyoobs, sizeof(MarkerHokuyoObs_t));
 		pthread_spin_unlock(&m_addr->shm_markers.locks[4]);
 		return true;
+	case MarkerData::MARKER_CAR_FOLLOWING:
+		pthread_spin_lock(&m_addr->shm_markers.locks[5]);
+		memcpy(&m_addr->shm_markers.s_carFollowing, &data.value.v_carFollowing, sizeof(MarkerCarFollowing_t));
+		pthread_spin_unlock(&m_addr->shm_markers.locks[5]);
+		return true;
+	case MarkerData::MARKER_VELOCITY_DEC:
+		pthread_spin_lock(&m_addr->shm_markers.locks[6]);
+		memcpy(&m_addr->shm_markers.s_velocityDec, &data.value.v_velocityDec, sizeof(MarkerVelocityDec_t));
+		pthread_spin_unlock(&m_addr->shm_markers.locks[6]);
+		return true;
 	default:
 		return false;
 	};
@@ -475,6 +485,16 @@ bool SharedObjectsImpl::GetMarker(MarkerData_t* data) const
 		pthread_spin_lock(&m_addr->shm_markers.locks[4]);
 		memcpy(&data->value.v_hokuyoobs, &m_addr->shm_markers.s_hokuyoobs, sizeof(MarkerHokuyoObs_t));
 		pthread_spin_unlock(&m_addr->shm_markers.locks[4]);
+		return true;
+	case MarkerData::MARKER_CAR_FOLLOWING:
+		pthread_spin_lock(&m_addr->shm_markers.locks[5]);
+		memcpy(&data->value.v_carFollowing, &m_addr->shm_markers.s_carFollowing, sizeof(MarkerCarFollowing_t));
+		pthread_spin_unlock(&m_addr->shm_markers.locks[5]);
+		return true;
+	case MarkerData::MARKER_VELOCITY_DEC:
+		pthread_spin_lock(&m_addr->shm_markers.locks[6]);
+		memcpy(&data->value.v_velocityDec, &m_addr->shm_markers.s_velocityDec, sizeof(MarkerVelocityDec_t));
+		pthread_spin_unlock(&m_addr->shm_markers.locks[6]);
 		return true;
 	default:
 		return false;

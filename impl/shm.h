@@ -63,7 +63,9 @@ struct SharedMarkers
 	MarkerTaillightImage_t s_taillightImage;
 	MarkerObstacle_t s_obstacle;
 	MarkerHokuyoObs_t s_hokuyoobs;
-	pthread_spinlock_t locks[5];
+	MarkerCarFollowing_t s_carFollowing;
+	MarkerVelocityDec_t s_velocityDec;
+	pthread_spinlock_t locks[7];
 };
 
 struct SharedMemory

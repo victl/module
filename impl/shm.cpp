@@ -282,6 +282,12 @@ bool SharedObjectsImpl::SetRecoData(const RecoData_t& data)
 		m_addr->shm_recoData.isValid[7] = true;
 		pthread_spin_unlock(&m_addr->shm_recoData.locks[7]);
 		return true;
+	case RecoData::RT_TRACK_ROAD:
+		pthread_spin_lock(&m_addr->shm_recoData.locks[8]);
+		memcpy(&m_addr->shm_recoData.s_trackRoad, &data.value.v_trackRoad, sizeof(RecoTrackRoad_t));
+		m_addr->shm_recoData.isValid[8] = true;
+		pthread_spin_unlock(&m_addr->shm_recoData.locks[8]);
+		return true;
 	default:
 		return false;
 	};
@@ -298,7 +304,10 @@ bool SharedObjectsImpl::GetRecoData(RecoData_t* data) const
 	case RecoData::RT_OBSTACLE:
 		pthread_spin_lock(&m_addr->shm_recoData.locks[0]);
 		if(m_addr->shm_recoData.isValid[0])
+		{
 			memcpy(&data->value.v_obstacle, &m_addr->shm_recoData.s_obstacle, sizeof(RecoObstacle_t));
+			m_addr->shm_recoData.isValid[0] = false;
+		}
 		else
 			result = false;
 		pthread_spin_unlock(&m_addr->shm_recoData.locks[0]);
@@ -306,7 +315,10 @@ bool SharedObjectsImpl::GetRecoData(RecoData_t* data) const
 	case RecoData::RT_STOPLINE:
 		pthread_spin_lock(&m_addr->shm_recoData.locks[1]);
 		if(m_addr->shm_recoData.isValid[1])
+		{
 			memcpy(&data->value.v_stopline, &m_addr->shm_recoData.s_stopline, sizeof(RecoStopLine_t));
+			m_addr->shm_recoData.isValid[1] = false;
+		}
 		else
 			result = false;
 		pthread_spin_unlock(&m_addr->shm_recoData.locks[1]);
@@ -314,7 +326,10 @@ bool SharedObjectsImpl::GetRecoData(RecoData_t* data) const
 	case RecoData::RT_TRAFFICSIGN:
 		pthread_spin_lock(&m_addr->shm_recoData.locks[2]);
 		if(m_addr->shm_recoData.isValid[2])
+		{
 			memcpy(&data->value.v_ts, &m_addr->shm_recoData.s_ts, sizeof(RecoTrafficSign_t));
+			m_addr->shm_recoData.isValid[2] = false;
+		}
 		else
 			result = false;
 		pthread_spin_unlock(&m_addr->shm_recoData.locks[2]);
@@ -322,7 +337,10 @@ bool SharedObjectsImpl::GetRecoData(RecoData_t* data) const
 	case RecoData::RT_TRAFFICLIGHT:
 		pthread_spin_lock(&m_addr->shm_recoData.locks[3]);
 		if(m_addr->shm_recoData.isValid[3])
+		{
 			memcpy(&data->value.v_tl, &m_addr->shm_recoData.s_tl, sizeof(RecoTrafficLight_t));
+			m_addr->shm_recoData.isValid[3] = false;
+		}
 		else
 			result = false;
 		pthread_spin_unlock(&m_addr->shm_recoData.locks[3]);
@@ -330,7 +348,10 @@ bool SharedObjectsImpl::GetRecoData(RecoData_t* data) const
 	case RecoData::RT_INTERSECTION:
 		pthread_spin_lock(&m_addr->shm_recoData.locks[4]);
 		if(m_addr->shm_recoData.isValid[4])
+		{
 			memcpy(&data->value.v_intersection, &m_addr->shm_recoData.s_intersection, sizeof(RecoIntersection_t));
+			m_addr->shm_recoData.isValid[4] = false;
+		}
 		else
 			result = false;
 		pthread_spin_unlock(&m_addr->shm_recoData.locks[4]);
@@ -338,7 +359,10 @@ bool SharedObjectsImpl::GetRecoData(RecoData_t* data) const
 	case RecoData::RT_TRACK_LDAD:
 		pthread_spin_lock(&m_addr->shm_recoData.locks[5]);
 		if(m_addr->shm_recoData.isValid[5])
+		{
 			memcpy(&data->value.v_trackLdAd, &m_addr->shm_recoData.s_trackLdAd, sizeof(RecoTrackLdAd_t));
+			m_addr->shm_recoData.isValid[5] = false;
+		}
 		else
 			result = false;
 		pthread_spin_unlock(&m_addr->shm_recoData.locks[5]);
@@ -346,7 +370,10 @@ bool SharedObjectsImpl::GetRecoData(RecoData_t* data) const
 	case RecoData::RT_TRACK_PTS:
 		pthread_spin_lock(&m_addr->shm_recoData.locks[6]);
 		if(m_addr->shm_recoData.isValid[6])
+		{
 			memcpy(&data->value.v_trackPts, &m_addr->shm_recoData.s_trackPts, sizeof(RecoTrackPts_t));
+			m_addr->shm_recoData.isValid[6] = false;
+		}
 		else
 			result = false;
 		pthread_spin_unlock(&m_addr->shm_recoData.locks[6]);
@@ -354,10 +381,24 @@ bool SharedObjectsImpl::GetRecoData(RecoData_t* data) const
 	case RecoData::RT_SPOT:
 		pthread_spin_lock(&m_addr->shm_recoData.locks[7]);
 		if(m_addr->shm_recoData.isValid[7])
+		{
 			memcpy(&data->value.v_spot, &m_addr->shm_recoData.s_spot, sizeof(RecoSpot_t));
+			m_addr->shm_recoData.isValid[7] = false;
+		}
 		else
 			result = false;
 		pthread_spin_unlock(&m_addr->shm_recoData.locks[7]);
+		break;
+	case RecoData::RT_TRACK_ROAD:
+		pthread_spin_lock(&m_addr->shm_recoData.locks[8]);
+		if(m_addr->shm_recoData.isValid[8])
+		{
+			memcpy(&data->value.v_trackRoad, &m_addr->shm_recoData.s_trackRoad, sizeof(RecoTrackRoad_t));
+			m_addr->shm_recoData.isValid[8] = false;
+		}
+		else
+			result = false;
+		pthread_spin_unlock(&m_addr->shm_recoData.locks[8]);
 		break;
 	default:
 		result = false;

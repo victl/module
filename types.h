@@ -76,12 +76,7 @@ enum IntersectionPoint
 //};
 
 // obstacle type for decision (ibeo <--> decision)
-//enum
-//{
-//	OBSTACLE_STATE_AVOID     = 1,
-//	OBSTACLE_STATE_STOP      = 2,
-//	OBSTACLE_STATE_RECOVER   = 3
-//};
+
 
 /****************************************************
  * Decision Structure (controller <--> decision)
@@ -583,6 +578,17 @@ typedef struct RecoTrackPts // RecoType=RT_TRACK_PTS
 	double curvature;
 } RecoTrackPts_t;
 
+// road tracking (ld ad & points)
+typedef struct RecoTrackRoad //RecoType=RT_TRACK_ROAD
+{
+	double ld;
+	double ad;
+	double x[TRACK_PTS_NUM];
+	double y[TRACK_PTS_NUM];
+	double lanewidth;
+	double curvature;
+} RecoTrackRoad_t;
+
 typedef struct RecoData
 {
 	enum
@@ -594,7 +600,8 @@ typedef struct RecoData
 		RT_INTERSECTION = 5,
 		RT_SPOT         = 6,
 		RT_TRACK_LDAD   = 7,
-		RT_TRACK_PTS    = 8
+		RT_TRACK_PTS    = 8,
+		RT_TRACK_ROAD   = 9
 	} type;
 
 	union
@@ -606,6 +613,7 @@ typedef struct RecoData
 		RecoIntersection_t v_intersection;
 		RecoTrackLdAd_t v_trackLdAd;
 		RecoTrackPts_t v_trackPts;
+		RecoTrackRoad_t v_trackRoad;
 		RecoSpot_t v_spot;
 	} value;
 	struct timeval timestamp;
@@ -688,7 +696,12 @@ typedef struct MarkerTaillightImage
 // ibeo <=> decision
 typedef struct MarkerObstacle
 {
-	int marker;
+	enum
+	{
+		OBSTACLE_STATE_AVOID   = 1,
+		OBSTACLE_STATE_STOP    = 2,
+		OBSTACLE_STATE_RECOVER = 3
+	} marker;
 } MarkerObstacle_t;
 
 // hokuyo->HDL

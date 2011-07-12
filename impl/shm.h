@@ -50,9 +50,10 @@ struct SharedRecoData
 	RecoIntersection_t s_intersection;
 	RecoTrackLdAd_t s_trackLdAd;
 	RecoTrackPts_t s_trackPts;
+	RecoTrackRoad_t s_trackRoad;
 	RecoSpot_t s_spot;
-	bool isValid[8];
-	pthread_spinlock_t locks[8];
+	bool isValid[9];
+	pthread_spinlock_t locks[9];
 };
 
 struct SharedMarkers

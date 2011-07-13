@@ -7,7 +7,7 @@
 
 namespace module
 {
-namespace log
+namespace logger
 {
 Log Log::log;
 LoggerPtr Log::logger = Log::Initialize();

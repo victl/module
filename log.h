@@ -13,7 +13,7 @@ using namespace log4cxx;
 
 namespace module
 {
-namespace log
+namespace logger
 {
 // useful macro
 #ifndef C99

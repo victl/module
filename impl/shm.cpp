@@ -1,7 +1,7 @@
 #include "shm.h"
 #include "../log.h"
 
-using namespace module::log;
+using namespace module::logger;
 
 namespace module
 {

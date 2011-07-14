@@ -33,12 +33,13 @@ enum
 	MODULE_VEHICLE_FOLLOWING         = 16,
 	MODULE_S_CURVE                   = 17,
 	MODULE_PARKING_1                 = 18,
-	MODULE_PARKING_2                 = 19
+	MODULE_PARKING_2                 = 19,
+	MODULE_CHANGE_PATH				 = 20
 };
 
 // utils macro
 #define MODULE_INDEX_MIN MODULE_CONTROLLER
-#define MODULE_INDEX_MAX MODULE_PARKING_2
+#define MODULE_INDEX_MAX MODULE_CHANGE_PATH
 #define MODULE_NUM (MODULE_INDEX_MAX - MODULE_INDEX_MIN + 1)
 
 /*
@@ -67,6 +68,7 @@ enum
 #define MODULE_S_CURVE_NAME                   "./ModuleSC"
 #define MODULE_PARKING_1_NAME                 "./ModuleP1"
 #define MODULE_PARKING_2_NAME                 "./ModuleP2"
+#define MODULE_CHANGE_PATH_NAME               "./ModuleCP"
 
 /*
  * define a cleanup handler called when interrupted or abort

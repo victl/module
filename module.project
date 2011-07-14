@@ -29,10 +29,13 @@
     <File Name="version.h"/>
     <File Name="utils.h"/>
   </VirtualDirectory>
+  <Dependencies Name="Debug"/>
+  <Dependencies Name="Release"/>
   <Settings Type="Static Library">
     <GlobalSettings>
       <Compiler Options="-pthread" C_Options="-pthread">
         <IncludePath Value="."/>
+        <Preprocessor Value="_REENTRANT"/>
       </Compiler>
       <Linker Options="-pthread">
         <LibraryPath Value="."/>
@@ -98,6 +101,4 @@
       </AdditionalRules>
     </Configuration>
   </Settings>
-  <Dependencies Name="Debug"/>
-  <Dependencies Name="Release"/>
 </CodeLite_Project>

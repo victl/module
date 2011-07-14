@@ -81,19 +81,22 @@ class SharedObjectsImpl : public SharedObjects
 protected:
 	struct SharedMemory* m_addr;
 
+	inline void Lock(pthread_spinlock_t* lock);
+	inline void Unlock(pthread_spinlock_t* lock);
+
 public:
 
-	bool GetDecision(Decision_t* decision) const;
+	bool GetDecision(Decision_t* decision);
 	bool SetDecision(const Decision_t& decision);
 
 	bool SetMetaData(const MetaData_t& data, int index = 0);
-	bool GetMetaData(MetaData* data, int index = 0) const;
+	bool GetMetaData(MetaData* data, int index = 0);
 
 	bool SetRecoData(const RecoData_t& data);
-	bool GetRecoData(RecoData_t* data) const;
+	bool GetRecoData(RecoData_t* data);
 
 	bool SetMarker(const MarkerData_t& data);
-	bool GetMarker(MarkerData_t* data) const;
+	bool GetMarker(MarkerData_t* data);
 };
 
 }

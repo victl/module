@@ -28,7 +28,7 @@ public:
 	 * SET/GET shared decision object
 	 */
 	virtual bool SetDecision(const Decision_t& decision) = 0;
-	virtual bool GetDecision(Decision_t* decision) const = 0;
+	virtual bool GetDecision(Decision_t* decision) = 0;
 
 	/*
 	 * SET/GET the meta data of the INDEX device
@@ -44,7 +44,7 @@ public:
 	 *        0,1 Hokuyo
 	 */
 	virtual bool SetMetaData(const MetaData_t& data, int index = 0) = 0;
-	virtual bool GetMetaData(MetaData* data, int index = 0) const = 0;
+	virtual bool GetMetaData(MetaData* data, int index = 0) = 0;
 
 	/*
 	 * SET/GET the recognition data.
@@ -56,7 +56,7 @@ public:
 	 *   Detecting/Recognition Process.
 	 */
 	virtual bool SetRecoData(const RecoData_t& data) = 0;
-	virtual bool GetRecoData(RecoData_t* data) const = 0;
+	virtual bool GetRecoData(RecoData_t* data) = 0;
 
 	/*
 	 * SET/GET markers
@@ -65,7 +65,7 @@ public:
 	 *   the data->value according to the data->type.
 	 */
 	virtual bool SetMarker(const MarkerData_t& data) = 0;
-	virtual bool GetMarker(MarkerData_t* data) const = 0;
+	virtual bool GetMarker(MarkerData_t* data) = 0;
 };
 
 }

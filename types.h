@@ -25,7 +25,7 @@ namespace module
 #define C_WIDTH 3
 #define CCAM_IMAGE_SIZE CCAM_IMAGE_WIDTH * CCAM_IMAGE_HEIGHT * C_WIDTH
 // Ibeo(ASL) meta data size
-#define ASL_MAX_POINTS 2000
+#define ASL_MAX_POINTS 8648
 #define ASL_MAX_CONTOURPOINTS	16
 #define ASL_MAX_OBJECTS		64
 // Hokuyo meta data size
@@ -374,8 +374,8 @@ typedef struct LPoint
 
 typedef struct MetaLaserHdl
 {
-	LPoint_t pts[HDL_MAX_POINT_NUMBER];
 	int pts_count;
+	LPoint_t pts[HDL_MAX_POINT_NUMBER];
 } MetaLaserHdl_t;
 
 // Black-White(BW) Camera Meta Data

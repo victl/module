@@ -63,6 +63,7 @@ bool SharedObjectsImpl::SetMetaData(const MetaData_t& data, int index)
 			memcpy(&m_addr->shm_metaData.s_cameraBW[index], &data.value.v_cameraBW, sizeof(MetaCameraBW_t));
 			m_addr->shm_metaData.isValid[2 + index] = true;
 			pthread_spin_unlock(&m_addr->shm_metaData.locks[2 + index]);
+			return true;
 		}
 		else
 			return false;

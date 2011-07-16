@@ -452,6 +452,11 @@ bool SharedObjectsImpl::SetMarker(const MarkerData_t& data)
 		memcpy(&m_addr->shm_markers.s_velocityDec, &data.value.v_velocityDec, sizeof(MarkerVelocityDec_t));
 		Unlock(&m_addr->shm_markers.locks[6]);
 		return true;
+	case MarkerData::MARKER_LANDMARK:
+		Lock(&m_addr->shm_markers.locks[7]);
+		memcpy(&m_addr->shm_markers.s_landmark, &data.value.v_landmark, sizeof(MarkerLandMark_t));
+		Unlock(&m_addr->shm_markers.locks[7]);
+		return true;
 	default:
 		return false;
 	};
@@ -498,6 +503,11 @@ bool SharedObjectsImpl::GetMarker(MarkerData_t* data)
 		Lock(&m_addr->shm_markers.locks[6]);
 		memcpy(&data->value.v_velocityDec, &m_addr->shm_markers.s_velocityDec, sizeof(MarkerVelocityDec_t));
 		Unlock(&m_addr->shm_markers.locks[6]);
+		return true;
+	case MarkerData::MARKER_LANDMARK:
+		Lock(&m_addr->shm_markers.locks[7]);
+		memcpy(&data->value.v_landmark, &m_addr->shm_markers.s_landmark, sizeof(MarkerLandMark_t));
+		Unlock(&m_addr->shm_markers.locks[7]);
 		return true;
 	default:
 		return false;

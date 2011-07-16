@@ -737,6 +737,45 @@ typedef struct MarkerVelocityDec
 	bool isDo;
 } MarkerVelocityDec_t;
 
+// landmark: TS => Navigation
+typedef struct MarkerLandMark
+{
+	enum
+	{
+		TR_NO_LEFT_TURN          = 1,
+		TR_NO_RIGHT_TURN         = 2,
+		TR_NO_PASS               = 3,
+		TR_NO_LEFT_RIGHT_TURN    = 4,
+		TR_NO_LEFT_PASS          = 5,
+		TR_NO_RIGHT_PASS         = 6,
+		TR_NO_ENTRY              = 7,
+		TR_STOP_AVOID            = 8,
+		TR_SPEED_DOWN            = 9,
+		TR_ATTENTION_PEDERSTRAIN = 10,
+		TR_ROAD_UNFLAT           = 11,
+		TR_EMERGENCY_STOP_AREA   = 12,
+		TR_STRAIGHT_FORWARD      = 13,
+		TR_LEFT_TURN             = 14,
+		TR_RIGHT_TURN            = 15,
+		TR_STRAIGHT_LEFT         = 16,
+		TR_STRAIGHT_RIGHT        = 17,
+		TR_LEFT_RIGHT            = 18,
+		TR_RIGHT_PASS            = 19,
+		TR_LEFT_PASS             = 20,
+		TR_HORN                  = 21,
+		TR_CIRCLE_DIRVE          = 22,
+		TR_PEDERSTRAIN_PATH      = 23,
+		TR_ALLOW_UTURN           = 24,
+		TR_PARKING_LOT           = 25,
+		TR_CONE_SIGN             = 26,
+		TR_DRIVE_TO_LEFT         = 27,
+		TR_DRIVE_TO_RIGHT        = 28,
+		TR_UNKNOWNSIGN           = 0
+	} type;
+	double angle;
+	double distance;
+} MarkerLandMark_t;
+
 typedef struct MarkerData
 {
 	enum
@@ -747,7 +786,8 @@ typedef struct MarkerData
 		MARKER_OBSTACLE        = 4,
 		MARKER_HOKUYO_OBS      = 5,
 		MARKER_CAR_FOLLOWING   = 6,
-		MARKER_VELOCITY_DEC    = 7
+		MARKER_VELOCITY_DEC    = 7,
+		MARKER_LANDMARK        = 8
 	} type;
 
 	union
@@ -759,6 +799,7 @@ typedef struct MarkerData
 		MarkerHokuyoObs_t v_hokuyoobs;
 		MarkerCarFollowing_t v_carFollowing;
 		MarkerVelocityDec_t v_velocityDec;
+		MarkerLandMark_t v_landmark;
 	} value;
 } MarkerData_t;
 }

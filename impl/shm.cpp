@@ -9,6 +9,21 @@ namespace module
 
 namespace shm
 {
+// Decision
+bool SharedObjectsImpl::GetConfig(Config_t* config)
+{
+	if(m_addr == NULL || config == NULL)
+		return false;
+
+	bool result = true;
+	Lock(&m_addr->shm_config.lock);
+	if(m_addr->shm_config.isValid)
+		memcpy(config, &m_addr->shm_config.s_config, sizeof(Config_t));
+	else
+		result = false;
+	Unlock(&m_addr->shm_config.lock);
+	return result;
+}
 
 // Decision
 bool SharedObjectsImpl::GetDecision(Decision_t* decision)

@@ -18,11 +18,11 @@ IplImage* ConvertUtils::Convert(const MetaCameraC_t& data)
 	return img;
 }
 
-IplImage* ConvertUtils::Convert(const MarkerTaillightImage_t& data)
-{
-	IplImage* img = cvCreateImage(cvSize(data.width, data.height), IPL_DEPTH_8U, 3);
-	memcpy(img->imageData, data.imgdata, img->imageSize);
-	return img;
-}
+//IplImage* ConvertUtils::Convert(const MarkerTaillightImage_t& data)
+//{
+//	IplImage* img = cvCreateImage(cvSize(data.width, data.height), IPL_DEPTH_8U, 3);
+//	memcpy(img->imageData, data.imgdata, img->imageSize);
+//	return img;
+//}
 }
 }

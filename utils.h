@@ -16,7 +16,7 @@ public:
 	 */
 	static IplImage* Convert(const MetaCameraBW_t& data);
 	static IplImage* Convert(const MetaCameraC_t& data);
-	static IplImage* Convert(const MarkerTaillightImage_t& data);
+//	static IplImage* Convert(const MarkerTaillightImage_t& data);
 };
 }
 }

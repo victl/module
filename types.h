@@ -75,7 +75,49 @@ enum IntersectionPoint
 //	UNLOCK_GUIDANCE_REGION   = 2
 //};
 
-// obstacle type for decision (ibeo <--> decision)
+/****************************************************
+ * Config Structure (MainControl <--> Decision)
+ */
+typedef struct Config
+{
+	enum
+	{
+		MODE_COMPETE = 0,
+		MODE_HIGHWAY = 1,
+		MODE_URBAN   = 2,
+		MODE_GRAND   = 3
+	} mode;
+
+	enum
+	{
+		TASK_GPSLANE      = 0,
+		TASK_GPSCURB      = 1,
+		TASK_NOGPSLANE    = 2,
+		TASK_NOGPSCURB    = 3,
+		TASK_OBSTACLELANE = 4,
+		TASK_OBSTACLECURB = 5,
+		TASK_TRAFFICSIGN  = 6,
+		TASK_SDRIVE       = 7,
+		TASK_PARKING_1    = 8,
+		TASK_PARKING_2    = 9,
+		TASK_SYNTEST      = 10
+	} task;
+
+	enum
+	{
+		VELOCITY_DEBUG = 0,
+		VELOCITY_LOW   = 1,
+		VELOCITY_MEDI  = 2,
+		VELOCITY_HIGH  = 3
+	} velocity;
+
+	bool equals(const struct Config& config)
+	{
+		if(config.mode == this->mode && config.task == this->task && config.velocity == this->velocity)
+			return true;
+		return false;
+	}
+} Config_t;
 
 
 /****************************************************
@@ -696,7 +738,8 @@ typedef struct MarkerIntersection
 // taillight image: HDL => TailLight
 typedef struct MarkerTaillightImage
 {
-	unsigned char imgdata[CCAM_IMAGE_SIZE];
+	int x;
+	int y;
 	int width;
 	int height;
 } MarkerTaillightImage_t;

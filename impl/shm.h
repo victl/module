@@ -45,6 +45,7 @@ struct SharedMetaData
 	MetaHokuyoPoints_t s_hokuyoPts[2];
 	MetaHokuyoObjects_t s_hokuyoObjs[2];
 	bool isValid[14];
+	struct timeval timestamps[14];
 	pthread_spinlock_t locks[14];
 };
 
@@ -59,8 +60,12 @@ struct SharedRecoData
 	RecoTrackPts_t s_trackPts;
 	RecoTrackRoad_t s_trackRoad;
 	RecoSpot_t s_spot;
-	bool isValid[9];
-	pthread_spinlock_t locks[9];
+	RecoSpotLine_t s_spotline;
+	bool isNew[RecoData::RT_MAX - 1];
+	bool isValid[RecoData::RT_MAX - 1];
+	struct timeval timestamps[RecoData::RT_MAX - 1];
+	double belief[RecoData::RT_MAX - 1];
+	pthread_spinlock_t locks[RecoData::RT_MAX - 1];
 };
 
 struct SharedMarkers
@@ -73,7 +78,8 @@ struct SharedMarkers
 	MarkerCarFollowing_t s_carFollowing;
 	MarkerVelocityDec_t s_velocityDec;
 	MarkerLandMark_t s_landmark;
-	pthread_spinlock_t locks[8];
+	MarkerLaneChange_t s_lanechange;
+	pthread_spinlock_t locks[MarkerData::MARKER_MAX - 1];
 };
 
 struct SharedMemory
@@ -103,7 +109,7 @@ public:
 	bool GetMetaData(MetaData* data, int index = 0);
 
 	bool SetRecoData(const RecoData_t& data);
-	bool GetRecoData(RecoData_t* data);
+	bool GetRecoData(RecoData_t* data, bool isGettingNewData);
 
 	bool SetMarker(const MarkerData_t& data);
 	bool GetMarker(MarkerData_t* data);

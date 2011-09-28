@@ -59,9 +59,12 @@ public:
 	 *
 	 *   Setting an RecoData should be called in a Objects/Environment
 	 *   Detecting/Recognition Process.
+	 *
+	 * params: isGettingNewData: if true, return new data from the last process.
+	 *     Otherwise return the value;
 	 */
 	virtual bool SetRecoData(const RecoData_t& data) = 0;
-	virtual bool GetRecoData(RecoData_t* data) = 0;
+	virtual bool GetRecoData(RecoData_t* data, bool isGettingNewData = false) = 0;
 
 	/*
 	 * SET/GET markers

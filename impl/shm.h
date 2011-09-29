@@ -45,6 +45,7 @@ struct SharedMetaData
 	MetaHokuyoPoints_t s_hokuyoPts[2];
 	MetaHokuyoObjects_t s_hokuyoObjs[2];
 	bool isValid[14];
+	bool isNew[14];
 	struct timeval timestamps[14];
 	pthread_spinlock_t locks[14];
 };
@@ -61,6 +62,7 @@ struct SharedRecoData
 	RecoTrackRoad_t s_trackRoad;
 	RecoSpot_t s_spot;
 	RecoSpotLine_t s_spotline;
+	RecoSideParking_t s_sideParking;
 	bool isNew[RecoData::RT_MAX - 1];
 	bool isValid[RecoData::RT_MAX - 1];
 	struct timeval timestamps[RecoData::RT_MAX - 1];
@@ -79,6 +81,8 @@ struct SharedMarkers
 	MarkerVelocityDec_t s_velocityDec;
 	MarkerLandMark_t s_landmark;
 	MarkerLaneChange_t s_lanechange;
+	MarkerParabola_t s_parabola;
+	bool isValid[MarkerData::MARKER_MAX - 1];
 	pthread_spinlock_t locks[MarkerData::MARKER_MAX - 1];
 };
 
@@ -101,12 +105,13 @@ protected:
 
 public:
 	bool GetConfig(Config_t* config);
+	void SetConfig(const Config_t& config);
 
 	bool GetDecision(Decision_t* decision);
 	bool SetDecision(const Decision_t& decision);
 
 	bool SetMetaData(const MetaData_t& data, int index = 0);
-	bool GetMetaData(MetaData* data, int index = 0);
+	bool GetMetaData(MetaData* data, int index = 0, bool isGettingNewData = false);
 
 	bool SetRecoData(const RecoData_t& data);
 	bool GetRecoData(RecoData_t* data, bool isGettingNewData);

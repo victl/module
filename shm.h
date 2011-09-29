@@ -49,7 +49,7 @@ public:
 	 *        0,1 Hokuyo
 	 */
 	virtual bool SetMetaData(const MetaData_t& data, int index = 0) = 0;
-	virtual bool GetMetaData(MetaData* data, int index = 0) = 0;
+	virtual bool GetMetaData(MetaData* data, int index = 0, bool isGettingNewData = false) = 0;
 
 	/*
 	 * SET/GET the recognition data.

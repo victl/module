@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <semaphore.h>
 #include <vector>
+#include <math.h>
 
 namespace module
 {
@@ -47,24 +48,24 @@ namespace module
 // Curb tracking type definition
 enum CurbTracking
 {
-	CURB_TRACKING_DEFAULT = 0,
-	CURB_TRACKING_LEFT    = 1,
-	CURB_TRACKING_RIGHT   = 2,
-	CURB_TRACKING_CIRCLE  = 3
+    CURB_TRACKING_DEFAULT = 0,
+    CURB_TRACKING_LEFT    = 1,
+    CURB_TRACKING_RIGHT   = 2,
+    CURB_TRACKING_CIRCLE  = 3
 };
 
 // intersection point type definition
 enum IntersectionPoint
 {
-	INTER_LEFTTOP     = 1,
-	INTER_TOP         = 2,
-	INTER_RIGHTTOP    = 3,
-	INTER_LEFTMIDDLE  = 4,
-	INTER_MIDDLE      = 5,
-	INTER_RIGHTMIDDLE = 6,
-	INTER_LEFTBOTTOM  = 7,
-	INTER_BOTTOM      = 8,
-	INTER_RIGHTBOTTOM = 9
+    INTER_LEFTTOP     = 1,
+    INTER_TOP         = 2,
+    INTER_RIGHTTOP    = 3,
+    INTER_LEFTMIDDLE  = 4,
+    INTER_MIDDLE      = 5,
+    INTER_RIGHTMIDDLE = 6,
+    INTER_LEFTBOTTOM  = 7,
+    INTER_BOTTOM      = 8,
+    INTER_RIGHTBOTTOM = 9
 };
 
 // obstacle marker (ibeo <--> decision)
@@ -82,38 +83,24 @@ typedef struct Config
 {
 	enum
 	{
-		MODE_COMPETE = 0,
-		MODE_HIGHWAY = 1,
-		MODE_URBAN   = 2,
-		MODE_GRAND   = 3
+	    MODE_COMPETE = 0,
+	    MODE_HIGHWAY = 1,
+	    MODE_URBAN   = 2,
+	    MODE_GRAND   = 3
 	} mode;
 
 	enum
 	{
-		TASK_GPSLANE      = 0,
-		TASK_GPSCURB      = 1,
-		TASK_NOGPSLANE    = 2,
-		TASK_NOGPSCURB    = 3,
-		TASK_OBSTACLELANE = 4,
-		TASK_OBSTACLECURB = 5,
-		TASK_TRAFFICSIGN  = 6,
-		TASK_SDRIVE       = 7,
-		TASK_PARKING_1    = 8,
-		TASK_PARKING_2    = 9,
-		TASK_SYNTEST      = 10
+		TASK_TEST         = 0,
+	    TASK_GPSLANE      = 1,
+	    TASK_SYNTEST      = 2
 	} task;
 
-	enum
-	{
-		VELOCITY_DEBUG = 0,
-		VELOCITY_LOW   = 1,
-		VELOCITY_MEDI  = 2,
-		VELOCITY_HIGH  = 3
-	} velocity;
+	double velocity;
 
 	bool equals(const struct Config& config)
 	{
-		if(config.mode == this->mode && config.task == this->task && config.velocity == this->velocity)
+		if(config.mode == this->mode && config.task == this->task && fabs(config.velocity - this->velocity) < 1e-6)
 			return true;
 		return false;
 	}
@@ -136,19 +123,36 @@ typedef struct Decision
 	bool Rightlight;
 	bool Warninglight;
 	bool Horn;
-	enum DecisionBehavior
+	enum
 	{
-		VS_START        = 1,
-		VS_STOP         = 2,
-		VS_ROADTRACKING = 3,
-		VS_LANECHANGE   = 4,
-		VS_INTERSECTION = 5,
-		VS_PARKING      = 6,
-		VS_PAUSE        = 7,
-		VS_OBAVOI       = 8,
-		VS_SDRIVE       = 9,
-		VS_EMERGENCY    = 10
+	    VS_START        = 1,
+	    VS_STOP         = 2,
+	    VS_ROADTRACKING = 3,
+	    VS_LANECHANGE   = 4,
+	    VS_INTERSECTION = 5,
+	    VS_PARKING      = 6,
+	    VS_PAUSE        = 7,
+	    VS_SDRIVE       = 8,
+	    VS_EMERGENCY    = 9,
+		VS_RUNNING      = 10
 	} State;
+
+	enum
+	{
+	    BEHAVIOR_ROADTRACKING                = 1,
+	    BEHAVIOR_INTERSECTION                = 2,
+	    BEHAVIOR_S_DRIVE                     = 3,
+	    BEHAVIOR_LANE_CHANGE                 = 4,
+	    BEHAVIOR_OVERTAKEING                 = 5,
+	    BEHAVIOR_SIDE_STOP                   = 6,
+	    BEHAVIOR_VEHICLE_FOLLOWING           = 7,
+	    BEHAVIOR_TRAFFICLIGHT_PAUSE          = 8,
+	    BEHAVIOR_SIDE_PARKING                = 9,
+	    BEHAVIOR_PARKING_1                   = 10,
+	    BEHAVIOR_PARKING_2                   = 11,
+	    BEHAVIOR_GPS_TRACKING                = 12,
+	    BEHAVIOR_MAX                         = 13
+	} Behavior;
 
 	struct timeval timestamp;
 
@@ -492,14 +496,14 @@ typedef struct MetaData
 {
 	enum
 	{
-		META_LASER_HDL      = 1,
-		META_CAMERA_BW      = 2,
-		META_CAMERA_C       = 3,
-		META_NAVIGATION     = 4,
-		META_ASL_POINTS     = 5,
-		META_ASL_OBJECTS    = 6,
-		META_HOKUYO_POINTS  = 7,
-		META_HOKUYO_OBJECTS = 8
+	    META_LASER_HDL      = 1,
+	    META_CAMERA_BW      = 2,
+	    META_CAMERA_C       = 3,
+	    META_NAVIGATION     = 4,
+	    META_ASL_POINTS     = 5,
+	    META_ASL_OBJECTS    = 6,
+	    META_HOKUYO_POINTS  = 7,
+	    META_HOKUYO_OBJECTS = 8
 	} type;
 
 	union
@@ -550,14 +554,6 @@ typedef struct RecoIntersection // RecoType=RT_INTERSECTION
 } RecoIntersection_t;
 
 // spot
-//typedef struct RecoSpot  // RecoType=RT_SPOT
-//{
-//	int len;
-//	double east[50];
-//	double north[50];
-//} RecoSpot_t;
-
-// spot
 typedef struct RecoSpot
 {
 	double cornerPtsX[4];
@@ -592,11 +588,12 @@ typedef struct RecoStopLine  // RecoType=RT_STOPLINE
 // Traffic Light
 typedef struct RecoTrafficLight  // RecoType=RT_TRAFFICLIGHT
 {
-	enum
+	enum TrafficLightType
 	{
-		TRL_RED    = 1,
-		TRL_GREEN  = 2,
-		TRL_YELLOW = 3
+		TRL_NONE   = 0,
+	    TRL_RED    = 1,
+	    TRL_YELLOW = 2,
+	    TRL_GREEN  = 3
 	} type;
 } RecoTrafficLight_t;
 
@@ -605,35 +602,35 @@ typedef struct RecoTrafficSign  // RecoType=RT_TRAFFICSIGN
 {
 	enum
 	{
-		TRS_NO_LEFT_TURN          = 1,
-		TRS_NO_RIGHT_TURN         = 2,
-		TRS_NO_PASS               = 3,
-		TRS_NO_LEFT_RIGHT_TURN    = 4,
-		TRS_NO_LEFT_PASS          = 5,
-		TRS_NO_RIGHT_PASS         = 6,
-		TRS_NO_ENTRY              = 7,
-		TRS_STOP_AVOID            = 8,
-		TRS_SPEED_DOWN            = 9,
-		TRS_ATTENTION_PEDERSTRAIN = 10,
-		TRS_ROAD_UNFLAT           = 11,
-		TRS_EMERGENCY_STOP_AREA   = 12,
-		TRS_STRAIGHT_FORWARD      = 13,
-		TRS_LEFT_TURN             = 14,
-		TRS_RIGHT_TURN            = 15,
-		TRS_STRAIGHT_LEFT         = 16,
-		TRS_STRAIGHT_RIGHT        = 17,
-		TRS_LEFT_RIGHT            = 18,
-		TRS_RIGHT_PASS            = 19,
-		TRS_LEFT_PASS             = 20,
-		TRS_HORN                  = 21,
-		TRS_CIRCLE_DIRVE          = 22,
-		TRS_PEDERSTRAIN_PATH      = 23,
-		TRS_ALLOW_UTURN           = 24,
-		TRS_PARKING_LOT           = 25,
-		TRS_CONE_SIGN             = 26,
-		TRS_DRIVE_TO_LEFT         = 27,
-		TRS_DRIVE_TO_RIGHT        = 28,
-		TRS_UNKNOWNSIGN           = 0
+	    TRS_NO_LEFT_TURN          = 1,
+	    TRS_NO_RIGHT_TURN         = 2,
+	    TRS_NO_PASS               = 3,
+	    TRS_NO_LEFT_RIGHT_TURN    = 4,
+	    TRS_NO_LEFT_PASS          = 5,
+	    TRS_NO_RIGHT_PASS         = 6,
+	    TRS_NO_ENTRY              = 7,
+	    TRS_STOP_AVOID            = 8,
+	    TRS_SPEED_DOWN            = 9,
+	    TRS_ATTENTION_PEDERSTRAIN = 10,
+	    TRS_ROAD_UNFLAT           = 11,
+	    TRS_EMERGENCY_STOP_AREA   = 12,
+	    TRS_STRAIGHT_FORWARD      = 13,
+	    TRS_LEFT_TURN             = 14,
+	    TRS_RIGHT_TURN            = 15,
+	    TRS_STRAIGHT_LEFT         = 16,
+	    TRS_STRAIGHT_RIGHT        = 17,
+	    TRS_LEFT_RIGHT            = 18,
+	    TRS_RIGHT_PASS            = 19,
+	    TRS_LEFT_PASS             = 20,
+	    TRS_HORN                  = 21,
+	    TRS_CIRCLE_DIRVE          = 22,
+	    TRS_PEDERSTRAIN_PATH      = 23,
+	    TRS_ALLOW_UTURN           = 24,
+	    TRS_PARKING_LOT           = 25,
+	    TRS_CONE_SIGN             = 26,
+	    TRS_DRIVE_TO_LEFT         = 27,
+	    TRS_DRIVE_TO_RIGHT        = 28,
+	    TRS_UNKNOWNSIGN           = 0
 	} type;
 
 	int position;
@@ -645,6 +642,7 @@ typedef struct RecoTrackLdAd   // RecoType=RT_TRACK_LDAD
 	double ld;
 	double ad;
 	double lanewidth;
+	double curbwidth;
 	double curvature;
 } RecoTrackLdAd_t;
 
@@ -668,21 +666,29 @@ typedef struct RecoTrackRoad //RecoType=RT_TRACK_ROAD
 	double curvature;
 } RecoTrackRoad_t;
 
+// side parking
+typedef struct RecoSideParking
+{
+	double x[10];
+	double y[10];
+} RecoSideParking_t;
+
 typedef struct RecoData
 {
 	enum RecoDataType
 	{
-		RT_OBSTACLE     = 1,
-		RT_STOPLINE     = 2,
-		RT_TRAFFICSIGN  = 3,
-		RT_TRAFFICLIGHT = 4,
-		RT_INTERSECTION = 5,
-		RT_SPOT         = 6,
-		RT_TRACK_LDAD   = 7,
-		RT_TRACK_PTS    = 8,
-		RT_TRACK_ROAD   = 9,
-		RT_SPOTLINE     = 10,
-		RT_MAX          = 11
+	    RT_OBSTACLE     = 1,
+	    RT_STOPLINE     = 2,
+	    RT_TRAFFICSIGN  = 3,
+	    RT_TRAFFICLIGHT = 4,
+	    RT_INTERSECTION = 5,
+	    RT_SPOT         = 6,
+	    RT_TRACK_LDAD   = 7,
+	    RT_TRACK_PTS    = 8,
+	    RT_TRACK_ROAD   = 9,
+	    RT_SPOTLINE     = 10,
+		RT_SIDEPARKING  = 11,
+	    RT_MAX          = 12
 	} type;
 
 	union RecoDataValue
@@ -697,6 +703,7 @@ typedef struct RecoData
 		RecoTrackRoad_t v_trackRoad;
 		RecoSpot_t v_spot;
 		RecoSpotLine_t v_spotline;
+		RecoSideParking_t v_sideParking;
 	} value;
 	struct timeval timestamp;
 	double belief;
@@ -739,7 +746,7 @@ typedef struct RndfData
 {
 	enum
 	{
-		RNDF_INTERSECTION = 1
+	    RNDF_INTERSECTION = 1
 	} type;
 
 	union
@@ -786,9 +793,9 @@ typedef struct MarkerObstacle
 {
 	enum
 	{
-		OBSTACLE_STATE_AVOID   = 1,
-		OBSTACLE_STATE_STOP    = 2,
-		OBSTACLE_STATE_RECOVER = 3
+	    OBSTACLE_STATE_AVOID   = 1,
+	    OBSTACLE_STATE_STOP    = 2,
+	    OBSTACLE_STATE_RECOVER = 3
 	} marker;
 } MarkerObstacle_t;
 
@@ -815,40 +822,49 @@ typedef struct MarkerVelocityDec
 	int flag; // 1 = slow down, 0 = do nothing
 } MarkerVelocityDec_t;
 
+// obstacle: track => obstacle
+typedef struct MarkerParabola
+{
+	double a[2];
+	double b[2];
+	double c[2];
+	double belief[2];
+} MarkerParabola_t;
+
 // landmark: TS => Navigation
 typedef struct MarkerLandMark
 {
 	enum
 	{
-		TR_NO_LEFT_TURN          = 1,
-		TR_NO_RIGHT_TURN         = 2,
-		TR_NO_PASS               = 3,
-		TR_NO_LEFT_RIGHT_TURN    = 4,
-		TR_NO_LEFT_PASS          = 5,
-		TR_NO_RIGHT_PASS         = 6,
-		TR_NO_ENTRY              = 7,
-		TR_STOP_AVOID            = 8,
-		TR_SPEED_DOWN            = 9,
-		TR_ATTENTION_PEDERSTRAIN = 10,
-		TR_ROAD_UNFLAT           = 11,
-		TR_EMERGENCY_STOP_AREA   = 12,
-		TR_STRAIGHT_FORWARD      = 13,
-		TR_LEFT_TURN             = 14,
-		TR_RIGHT_TURN            = 15,
-		TR_STRAIGHT_LEFT         = 16,
-		TR_STRAIGHT_RIGHT        = 17,
-		TR_LEFT_RIGHT            = 18,
-		TR_RIGHT_PASS            = 19,
-		TR_LEFT_PASS             = 20,
-		TR_HORN                  = 21,
-		TR_CIRCLE_DIRVE          = 22,
-		TR_PEDERSTRAIN_PATH      = 23,
-		TR_ALLOW_UTURN           = 24,
-		TR_PARKING_LOT           = 25,
-		TR_CONE_SIGN             = 26,
-		TR_DRIVE_TO_LEFT         = 27,
-		TR_DRIVE_TO_RIGHT        = 28,
-		TR_UNKNOWNSIGN           = 0
+	    TR_NO_LEFT_TURN          = 1,
+	    TR_NO_RIGHT_TURN         = 2,
+	    TR_NO_PASS               = 3,
+	    TR_NO_LEFT_RIGHT_TURN    = 4,
+	    TR_NO_LEFT_PASS          = 5,
+	    TR_NO_RIGHT_PASS         = 6,
+	    TR_NO_ENTRY              = 7,
+	    TR_STOP_AVOID            = 8,
+	    TR_SPEED_DOWN            = 9,
+	    TR_ATTENTION_PEDERSTRAIN = 10,
+	    TR_ROAD_UNFLAT           = 11,
+	    TR_EMERGENCY_STOP_AREA   = 12,
+	    TR_STRAIGHT_FORWARD      = 13,
+	    TR_LEFT_TURN             = 14,
+	    TR_RIGHT_TURN            = 15,
+	    TR_STRAIGHT_LEFT         = 16,
+	    TR_STRAIGHT_RIGHT        = 17,
+	    TR_LEFT_RIGHT            = 18,
+	    TR_RIGHT_PASS            = 19,
+	    TR_LEFT_PASS             = 20,
+	    TR_HORN                  = 21,
+	    TR_CIRCLE_DIRVE          = 22,
+	    TR_PEDERSTRAIN_PATH      = 23,
+	    TR_ALLOW_UTURN           = 24,
+	    TR_PARKING_LOT           = 25,
+	    TR_CONE_SIGN             = 26,
+	    TR_DRIVE_TO_LEFT         = 27,
+	    TR_DRIVE_TO_RIGHT        = 28,
+	    TR_UNKNOWNSIGN           = 0
 	} type;
 	double angle;
 	double distance;
@@ -865,16 +881,17 @@ typedef struct MarkerData
 {
 	enum MarkerDataType
 	{
-		MARKER_NAVIGATION      = 1,
-		MARKER_INTERSECTION    = 2,
-		MARKER_TAILLIGHT_IMAGE = 3,
-		MARKER_OBSTACLE        = 4,
-		MARKER_HOKUYO_OBS      = 5,
-		MARKER_CAR_FOLLOWING   = 6,
-		MARKER_VELOCITY_DEC    = 7,
-		MARKER_LANDMARK        = 8,
-		MARKER_LANECHANGE      = 9,
-		MARKER_MAX             = 10
+	    MARKER_NAVIGATION      = 1,
+	    MARKER_INTERSECTION    = 2,
+	    MARKER_TAILLIGHT_IMAGE = 3,
+	    MARKER_OBSTACLE        = 4,
+	    MARKER_HOKUYO_OBS      = 5,
+	    MARKER_CAR_FOLLOWING   = 6,
+	    MARKER_VELOCITY_DEC    = 7,
+	    MARKER_LANDMARK        = 8,
+	    MARKER_LANECHANGE      = 9,
+		MARKER_PARABOLA        = 10,
+	    MARKER_MAX             = 11
 	} type;
 
 	union
@@ -888,6 +905,7 @@ typedef struct MarkerData
 		MarkerVelocityDec_t v_velocityDec;
 		MarkerLandMark_t v_landmark;
 		MarkerLaneChange_t v_lanechange;
+		MarkerParabola_t v_parabola;
 	} value;
 } MarkerData_t;
 }

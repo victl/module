@@ -40,29 +40,22 @@ struct SharedMetaData
 	MetaLaserHdl_t s_laserHdl;
 	MetaCameraBW_t s_cameraBW[3];
 	MetaCameraC_t s_cameraC;
-	MetaAslPoints_t s_aslPts[2];
-	MetaAslObjects_t s_aslObjs[2];
-	MetaHokuyoPoints_t s_hokuyoPts[2];
-	MetaHokuyoObjects_t s_hokuyoObjs[2];
-	bool isValid[14];
-	bool isNew[14];
-	struct timeval timestamps[14];
-	pthread_spinlock_t locks[14];
+	MetaLUXPoints_t s_luxPts;
+	MetaLUXObjects_t s_luxObjs;
+//	MetaHokuyoPoints_t s_hokuyoPts[2];
+//	MetaHokuyoObjects_t s_hokuyoObjs[2];
+	bool isValid[8];
+	bool isNew[8];
+	struct timeval timestamps[8];
+	pthread_spinlock_t locks[8];
 };
 
 struct SharedRecoData
 {
-	RecoObstacle_t s_obstacle;
 	RecoStopLine_t s_stopline;
 	RecoTrafficSign_t s_ts;
 	RecoTrafficLight_t s_tl;
-	RecoIntersection_t s_intersection;
 	RecoTrackLdAd_t s_trackLdAd;
-	RecoTrackPts_t s_trackPts;
-	RecoTrackRoad_t s_trackRoad;
-	RecoSpot_t s_spot;
-	RecoSpotLine_t s_spotline;
-	RecoSideParking_t s_sideParking;
 	bool isNew[RecoData::RT_MAX - 1];
 	bool isValid[RecoData::RT_MAX - 1];
 	struct timeval timestamps[RecoData::RT_MAX - 1];
@@ -75,13 +68,13 @@ struct SharedMarkers
 	MarkerNavi_t s_navi;
 	MarkerIntersection_t s_intersection;
 	MarkerTaillightImage_t s_taillightImage;
-	MarkerObstacle_t s_obstacle;
 	MarkerHokuyoObs_t s_hokuyoobs;
-	MarkerCarFollowing_t s_carFollowing;
 	MarkerVelocityDec_t s_velocityDec;
-	MarkerLandMark_t s_landmark;
 	MarkerLaneChange_t s_lanechange;
 	MarkerParabola_t s_parabola;
+	MarkerLaneChangeObstacle_t s_lanechangeobstacle;
+	MarkerLaneChangeSide_t s_lanechangeside;
+	MarkerObstacle_t s_obstacle;
 	bool isValid[MarkerData::MARKER_MAX - 1];
 	pthread_spinlock_t locks[MarkerData::MARKER_MAX - 1];
 };
@@ -106,6 +99,8 @@ protected:
 public:
 	bool GetConfig(Config_t* config);
 	void SetConfig(const Config_t& config);
+
+	void SetGuidePtsStartIndex(int index);
 
 	bool GetDecision(Decision_t* decision);
 	bool SetDecision(const Decision_t& decision);

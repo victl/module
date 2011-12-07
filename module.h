@@ -20,19 +20,20 @@ enum
 	MODULE_CAPTURE_PYLON             = 5,
 	MODULE_CAPTURE_PYLON_MONO        = 6,
 	MODULE_CAPTURE_HOKUYO            = 7,
+	MODULE_CAPTURE_LUX               = 8,
 
 	// navigation
-	MODULE_NAV_GPS                   = 8,
+	MODULE_NAV_GPS                   = 9,
 
 	// basic functions (without decision)
-	MODULE_TRAFFICSIGN_RECOGNITION   = 9,
-	MODULE_TRAFFICLIGHT_RECOGNITION  = 10,
-	MODULE_ROAD_TRACKING             = 11,
-	MODULE_VEHICLE_FOLLOWING         = 12,
-	MODULE_S_CURVE                   = 13,
-	MODULE_PARKING_1                 = 14,
-	MODULE_SIDE_PARKING              = 15,
-	MODULE_CHANGE_PATH				 = 16
+	MODULE_TRAFFICSIGN_RECOGNITION   = 10,
+	MODULE_TRAFFICLIGHT_RECOGNITION  = 11,
+	MODULE_ROAD_TRACKING             = 12,
+	MODULE_VEHICLE_FOLLOWING         = 13,
+	MODULE_S_CURVE                   = 15,
+	MODULE_PARKING_1                 = 15,
+	MODULE_SIDE_PARKING              = 16,
+	MODULE_CHANGE_PATH				 = 17
 };
 
 // utils macro
@@ -52,7 +53,7 @@ enum
 #define MODULE_CAPTURE_HDL_NAME               "./ModuleCapHdl"
 #define MODULE_CAPTURE_PYLON_NAME             "./ModuleCapPylon"
 #define MODULE_CAPTURE_PYLON_MONO_NAME        "./ModuleCapPylonMono"
-//#define MODULE_CAPTURE_ASL_NAME               "./ModuleCapAsl"
+#define MODULE_CAPTURE_LUX_NAME               "./ModuleCapLux"
 #define MODULE_CAPTURE_HOKUYO_NAME            "./ModuleCapHokuyo"
 
 #define MODULE_NAV_GPS_NAME                   "./ModuleNavGps"

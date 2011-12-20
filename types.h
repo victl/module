@@ -496,13 +496,12 @@ typedef struct MarkerTaillightImage
 // emergency
 typedef struct MarkerObstacle
 {
-	enum
-	{
-	    OBSTACLE_STATE_AVOID   = 1,
-	    OBSTACLE_STATE_STOP    = 2,
-	    OBSTACLE_STATE_RECOVER = 3
-	} marker;
+	int level;
 } MarkerObstacle_t;
+typedef struct MarkerObstacleLux
+{
+	int level;
+} MarkerObstacleLux_t;
 // hokuyo->HDL
 typedef struct MarkerHokuyoObs // MarkerType=MARKER_HOKUYO_OBS
 {
@@ -516,6 +515,11 @@ typedef struct MarkerVelocityDec
 	double delta_v; // alway be no greater than 0
 	int flag; // 1 = slow down, 0 = do nothing
 } MarkerVelocityDec_t;
+typedef struct MarkerVelocityDecLux
+{
+	double delta_v; // alway be no greater than 0
+	int flag; // 1 = slow down, 0 = do nothing
+} MarkerVelocityDecLux_t;
 // obstacle: track => obstacle
 typedef struct MarkerParabola
 {
@@ -559,12 +563,14 @@ typedef struct MarkerData
 	    MARKER_TAILLIGHT_IMAGE 	   = 3,
 	    MARKER_HOKUYO_OBS          = 4,
 	    MARKER_VELOCITY_DEC        = 5,
-	    MARKER_LANECHANGE          = 6,
-	    MARKER_PARABOLA            = 7,
-	    MARKER_LANECHANGE_OBSTACLE = 8,
-	    MARKER_LANECHANGE_SIDE     = 9,
-	    MARKER_OBSTACLE            = 10,
-	    MARKER_MAX                 = 11
+		MARKER_VELOCITY_DEC_LUX    = 6,
+	    MARKER_LANECHANGE          = 7,
+	    MARKER_PARABOLA            = 8,
+	    MARKER_LANECHANGE_OBSTACLE = 9,
+	    MARKER_LANECHANGE_SIDE     = 10,
+	    MARKER_OBSTACLE            = 11,
+		MARKER_OBSTACLE_LUX        = 12,
+	    MARKER_MAX                 = 13
 	} type;
 	union
 	{
@@ -573,11 +579,13 @@ typedef struct MarkerData
 		MarkerTaillightImage_t v_taillightImage;
 		MarkerHokuyoObs_t v_hokuyoobs;
 		MarkerVelocityDec_t v_velocityDec;
+		MarkerVelocityDecLux_t v_velocityDecLux;
 		MarkerLaneChange_t v_lanechange;
 		MarkerParabola_t v_parabola;
 		MarkerLaneChangeObstacle_t v_lanechangeobstacle;
 		MarkerLaneChangeSide_t v_lanechangeside;
 		MarkerObstacle_t v_obstacle;
+		MarkerObstacleLux_t v_obstacleLux;
 	} value;
 } MarkerData_t;
 }

@@ -70,11 +70,13 @@ struct SharedMarkers
 	MarkerTaillightImage_t s_taillightImage;
 	MarkerHokuyoObs_t s_hokuyoobs;
 	MarkerVelocityDec_t s_velocityDec;
+	MarkerVelocityDecLux_t s_velocityDecLux;
 	MarkerLaneChange_t s_lanechange;
 	MarkerParabola_t s_parabola;
 	MarkerLaneChangeObstacle_t s_lanechangeobstacle;
 	MarkerLaneChangeSide_t s_lanechangeside;
 	MarkerObstacle_t s_obstacle;
+	MarkerObstacleLux_t s_obstacleLux;
 	bool isValid[MarkerData::MARKER_MAX - 1];
 	pthread_spinlock_t locks[MarkerData::MARKER_MAX - 1];
 };

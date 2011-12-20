@@ -411,6 +411,9 @@ bool SharedObjectsImpl::SetMarker(const MarkerData_t& data)
 	case MarkerData::MARKER_VELOCITY_DEC:
 		memcpy(&m_addr->shm_markers.s_velocityDec, &data.value.v_velocityDec, sizeof(MarkerVelocityDec_t));
 		break;
+	case MarkerData::MARKER_VELOCITY_DEC_LUX:
+		memcpy(&m_addr->shm_markers.s_velocityDecLux, &data.value.v_velocityDecLux, sizeof(MarkerVelocityDecLux_t));
+		break;
 	case MarkerData::MARKER_LANECHANGE:
 		memcpy(&m_addr->shm_markers.s_lanechange, &data.value.v_lanechange, sizeof(MarkerLaneChange_t));
 		break;
@@ -425,6 +428,9 @@ bool SharedObjectsImpl::SetMarker(const MarkerData_t& data)
 		break;
 	case MarkerData::MARKER_OBSTACLE:
 		memcpy(&m_addr->shm_markers.s_obstacle, &data.value.v_obstacle, sizeof(MarkerObstacle_t));
+		break;
+	case MarkerData::MARKER_OBSTACLE_LUX:
+		memcpy(&m_addr->shm_markers.s_obstacleLux, &data.value.v_obstacleLux, sizeof(MarkerObstacleLux_t));
 		break;
 	default:
 		break;
@@ -463,6 +469,9 @@ bool SharedObjectsImpl::GetMarker(MarkerData_t* data)
 		case MarkerData::MARKER_VELOCITY_DEC:
 			memcpy(&data->value.v_velocityDec, &m_addr->shm_markers.s_velocityDec, sizeof(MarkerVelocityDec_t));
 			break;
+		case MarkerData::MARKER_VELOCITY_DEC_LUX:
+			memcpy(&data->value.v_velocityDecLux, &m_addr->shm_markers.s_velocityDecLux, sizeof(MarkerVelocityDecLux_t));
+			break;
 		case MarkerData::MARKER_LANECHANGE:
 			memcpy(&data->value.v_lanechange, &m_addr->shm_markers.s_lanechange, sizeof(MarkerLaneChange_t));
 			break;
@@ -477,6 +486,9 @@ bool SharedObjectsImpl::GetMarker(MarkerData_t* data)
 			break;
 		case MarkerData::MARKER_OBSTACLE:
 			memcpy(&data->value.v_obstacle, &m_addr->shm_markers.s_obstacle, sizeof(MarkerObstacle_t));
+			break;
+		case MarkerData::MARKER_OBSTACLE_LUX:
+			memcpy(&data->value.v_obstacleLux, &m_addr->shm_markers.s_obstacleLux, sizeof(MarkerObstacleLux_t));
 			break;
 		default:
 			result = false;

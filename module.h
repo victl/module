@@ -13,27 +13,29 @@ enum
 	MODULE_DECISION                  = 1,
 	// emergency
 	MODULE_EMERGENCY                 = 2,
+	MODULE_EMERGENCY_LUX             = 3,
 	// slowdown
-	MODULE_SLOWDOWN                  = 3,
+	MODULE_SLOWDOWN                  = 4,
+	MODULE_SLOWDOWN_LUX              = 5,
 	// device capture meta data
-	MODULE_CAPTURE_HDL               = 4,
-	MODULE_CAPTURE_PYLON             = 5,
-	MODULE_CAPTURE_PYLON_MONO        = 6,
-	MODULE_CAPTURE_HOKUYO            = 7,
-	MODULE_CAPTURE_LUX               = 8,
+	MODULE_CAPTURE_HDL               = 6,
+	MODULE_CAPTURE_PYLON             = 7,
+	MODULE_CAPTURE_PYLON_MONO        = 8,
+	MODULE_CAPTURE_HOKUYO            = 9,
+	MODULE_CAPTURE_LUX               = 10,
 
 	// navigation
-	MODULE_NAV_GPS                   = 9,
+	MODULE_NAV_GPS                   = 11,
 
 	// basic functions (without decision)
-	MODULE_TRAFFICSIGN_RECOGNITION   = 10,
-	MODULE_TRAFFICLIGHT_RECOGNITION  = 11,
-	MODULE_ROAD_TRACKING             = 12,
-	MODULE_VEHICLE_FOLLOWING         = 13,
-	MODULE_S_CURVE                   = 15,
-	MODULE_PARKING_1                 = 15,
-	MODULE_SIDE_PARKING              = 16,
-	MODULE_CHANGE_PATH				 = 17
+	MODULE_TRAFFICSIGN_RECOGNITION   = 12,
+	MODULE_TRAFFICLIGHT_RECOGNITION  = 13,
+	MODULE_ROAD_TRACKING             = 14,
+	MODULE_VEHICLE_FOLLOWING         = 15,
+	MODULE_S_CURVE                   = 16,
+	MODULE_PARKING_1                 = 17,
+	MODULE_SIDE_PARKING              = 18,
+	MODULE_CHANGE_PATH				 = 19
 };
 
 // utils macro
@@ -48,7 +50,9 @@ enum
 #define MODULE_CONTROLLER_NAME                "./ModuleController"
 #define MODULE_DECISION_NAME                  "./ModuleDecision"
 #define MODULE_EMERGENCY_NAME                 "./ModuleEmergency"
+#define MODULE_EMERGENCY_LUX_NAME             "./ModuleEmergencyLux"
 #define MODULE_SLOWDOWN_NAME                  "./ModuleSlowDown"
+#define MODULE_SLOWDOWN_LUX_NAME                  "./ModuleSlowDownLux"
 
 #define MODULE_CAPTURE_HDL_NAME               "./ModuleCapHdl"
 #define MODULE_CAPTURE_PYLON_NAME             "./ModuleCapPylon"

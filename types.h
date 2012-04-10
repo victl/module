@@ -106,7 +106,7 @@ typedef struct Decision
 	double AzimuthDevi;
 	double DesiredVelocity;
 	double VehicleVelocity;
-	double Acceleratio;
+	double Acceleration;
 	char Shift;
 	bool Leftlight;
 	bool Rightlight;
@@ -118,7 +118,7 @@ typedef struct Decision
 	    VS_EMERGENCY    = 4,
 	    VS_RUNNING      = 5
 	} State;
-	enum BehaviorTypez
+	enum BehaviorType
 	{
 	    BEHAVIOR_ROADTRACKING                = 1,
 	    BEHAVIOR_CROSS                       = 2,
@@ -152,6 +152,8 @@ typedef struct MetaNavigation
 	double Velocity[3];
 	double Eulr[3];
 	double AngularVelocity[3];
+	double V;
+	double A;
 	double COV[3];
 	double TMbr[4][4];
 	double org_xyz[3];

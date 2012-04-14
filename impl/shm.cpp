@@ -9,43 +9,6 @@ namespace module
 
 namespace shm
 {
-// Config
-bool SharedObjectsImpl::GetConfig(Config_t* config)
-{
-	if(m_addr == NULL || config == NULL)
-		return false;
-
-	bool result = true;
-	Lock(&m_addr->shm_config.lock);
-	if(m_addr->shm_config.isValid)
-		memcpy(config, &m_addr->shm_config.s_config, sizeof(Config_t));
-	else
-		result = false;
-	Unlock(&m_addr->shm_config.lock);
-	return result;
-}
-
-void SharedObjectsImpl::SetConfig(const Config_t& config)
-{
-	if(m_addr == NULL)
-		return;
-
-	Lock(&m_addr->shm_config.lock);
-	memcpy(&m_addr->shm_config.s_config, &config, sizeof(Config_t));
-	m_addr->shm_config.isValid = true;
-	Unlock(&m_addr->shm_config.lock);
-}
-
-void SharedObjectsImpl::SetGuidePtsStartIndex(int index)
-{
-	if(m_addr == NULL || index < 1 || index > GUIDEPTS_MAX_NUM)
-		return;
-
-	Lock(&m_addr->shm_config.lock);
-	if(index <= m_addr->shm_config.s_config.guidePts.number)
-		m_addr->shm_config.s_config.guidePts.startIndex = index;
-	Unlock(&m_addr->shm_config.lock);
-}
 
 // Decision
 bool SharedObjectsImpl::GetDecision(Decision_t* decision)

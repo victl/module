@@ -10,8 +10,6 @@ namespace module
 /****************************************************
  * device meta data macro
  */
-// Max Guide Points
-#define GUIDEPTS_MAX_NUM       100
 //Ibeo(LUX) meta data size
 #define LUX_MAX_POINTS         11360
 #define LUX_MAX_OBJECTS        64
@@ -37,64 +35,6 @@ namespace module
 //#define HOKUYO_MAX_POINTS 1081
 //#define HOKUYO_MAX_OBJECTS  20
 //#define HOKUYO_MAX_CONTOURPOINTS 150
-/****************************************************
- * Config Structure (MainControl <--> Decision)
- */
-enum GuidePointType
-{
-    GPT_START    = 0,
-    GPT_CROSSIN  = 1,
-    GPT_CROSSOUT = 2,
-    GPT_END      = 3
-};
-enum GuidePointProperty
-{
-    GPP_UNKNOWN   = 0,
-    GPP_FORWARD   = 1,
-    GPP_RIGHTTURN = 2,
-    GPP_LEFTTURN  = 3,
-    GPP_UTURN     = 4,
-    GPP_TRS       = 5
-};
-typedef struct GuidePoint
-{
-	int index;
-	double latitude;
-	double longtitude;
-	double height;
-	int p1;
-	int p2;
-} GuidePoint_t;
-typedef struct GuidePts
-{
-	GuidePoint_t pts[GUIDEPTS_MAX_NUM];
-	int number;
-	int startIndex;
-} GuidePts_t;
-typedef struct Config
-{
-	enum
-	{
-	    MODE_COMPETE = 0,
-	    MODE_HIGHWAY = 1,
-	    MODE_URBAN   = 2,
-	    MODE_GRAND   = 3
-	} mode;
-	enum
-	{
-	    TASK_TEST         = 0,
-	    TASK_GPSLANE      = 1,
-	    TASK_SYNTEST      = 2
-	} task;
-	double velocity;
-	GuidePts_t guidePts;
-	bool equals(const struct Config& config)
-	{
-		if(config.mode == this->mode && config.task == this->task && fabs(config.velocity - this->velocity) < 1e-6)
-			return true;
-		return false;
-	}
-} Config_t;
 /****************************************************
  * Decision Structure (controller <--> decision)
  */

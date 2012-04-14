@@ -25,11 +25,6 @@ public:
 	static SharedObjects& GetInstance();
 
 	/*
-	 * GET MainControl Config
-	 */
-	virtual bool GetConfig(Config_t* config) = 0;
-
-	/*
 	 * SET/GET shared decision object
 	 */
 	virtual bool SetDecision(const Decision_t& decision) = 0;

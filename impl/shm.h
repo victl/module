@@ -20,13 +20,6 @@ namespace shm
 // shm
 #define SHM_NAME "/ugv"
 
-struct SharedConfig
-{
-	Config_t s_config;
-	bool isValid;
-	pthread_spinlock_t lock;
-};
-
 struct SharedDecision
 {
 	Decision_t s_decision;
@@ -83,7 +76,6 @@ struct SharedMarkers
 
 struct SharedMemory
 {
-	struct SharedConfig shm_config;
 	struct SharedDecision shm_decision;
 	struct SharedMetaData shm_metaData;
 	struct SharedRecoData shm_recoData;
@@ -99,11 +91,6 @@ protected:
 	inline void Unlock(pthread_spinlock_t* lock);
 
 public:
-	bool GetConfig(Config_t* config);
-	void SetConfig(const Config_t& config);
-
-	void SetGuidePtsStartIndex(int index);
-
 	bool GetDecision(Decision_t* decision);
 	bool SetDecision(const Decision_t& decision);
 

@@ -62,7 +62,7 @@ enum
 #define MODULE_CAPTURE_HOKUYO_NAME            "./ModuleCapHokuyo"
 
 #define MODULE_NAV_GPS_NAME                   "./ModuleNavGps"
-#define MODULE_NAV_GSP_SHOW_NAME              "./ModuleNavGpsShow"
+#define MODULE_NAV_GPS_SHOW_NAME              "./ModuleNavGpsShow"
 
 #define MODULE_TRAFFICSIGN_RECOGNITION_NAME   "./ModuleTS"
 #define MODULE_TRAFFICLIGHT_RECOGNITION_NAME  "./ModuleTL"

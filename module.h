@@ -26,16 +26,17 @@ enum
 
 	// navigation
 	MODULE_NAV_GPS                   = 11,
+	MODULE_NAV_GPS_SHOW              = 12,
 
 	// basic functions (without decision)
-	MODULE_TRAFFICSIGN_RECOGNITION   = 12,
-	MODULE_TRAFFICLIGHT_RECOGNITION  = 13,
-	MODULE_ROAD_TRACKING             = 14,
-	MODULE_VEHICLE_FOLLOWING         = 15,
-	MODULE_S_CURVE                   = 16,
-	MODULE_PARKING_1                 = 17,
-	MODULE_SIDE_PARKING              = 18,
-	MODULE_CHANGE_PATH				 = 19
+	MODULE_TRAFFICSIGN_RECOGNITION   = 13,
+	MODULE_TRAFFICLIGHT_RECOGNITION  = 14,
+	MODULE_ROAD_TRACKING             = 15,
+	MODULE_VEHICLE_FOLLOWING         = 16,
+	MODULE_S_CURVE                   = 17,
+	MODULE_PARKING_1                 = 18,
+	MODULE_SIDE_PARKING              = 19,
+	MODULE_CHANGE_PATH				 = 20
 };
 
 // utils macro
@@ -61,7 +62,7 @@ enum
 #define MODULE_CAPTURE_HOKUYO_NAME            "./ModuleCapHokuyo"
 
 #define MODULE_NAV_GPS_NAME                   "./ModuleNavGps"
-//#define MODULE_NAV_MAP_NAME                   "./ModuleNavMap"
+#define MODULE_NAV_GSP_SHOW_NAME              "./ModuleNavGpsShow"
 
 #define MODULE_TRAFFICSIGN_RECOGNITION_NAME   "./ModuleTS"
 #define MODULE_TRAFFICLIGHT_RECOGNITION_NAME  "./ModuleTL"

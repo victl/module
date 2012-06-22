@@ -99,6 +99,14 @@ bool SharedObjectsImpl::SetMetaData(const MetaData_t& data, int index)
 		m_addr->shm_metaData.timestamps[7] = data.timestamp;
 		Unlock(&m_addr->shm_metaData.locks[7]);
 		return true;
+	case MetaData::META_LOCAL_NAVIGATION:
+		Lock(&m_addr->shm_metaData.locks[8]);
+		memcpy(&m_addr->shm_metaData.s_navi_local, &data.value.v_navi_local, sizeof(MetaLocalNavigation_t));
+		m_addr->shm_metaData.isValid[8] = true;
+		m_addr->shm_metaData.isNew[8] = true;
+		m_addr->shm_metaData.timestamps[8] = data.timestamp;
+		Unlock(&m_addr->shm_metaData.locks[8]);
+		return true;
 //	case MetaData::META_HOKUYO_POINTS:
 //		if(index >= 0 && index <= 1)
 //		{
@@ -231,6 +239,20 @@ bool SharedObjectsImpl::GetMetaData(MetaData_t* data, int index, bool isGettingN
 		}
 		Unlock(&m_addr->shm_metaData.locks[7]);
 		break;
+	case MetaData::META_LOCAL_NAVIGATION:
+		Lock(&m_addr->shm_metaData.locks[8]);
+		if(m_addr->shm_metaData.isValid[8]
+		        && (!isGettingNewData || (isGettingNewData && m_addr->shm_metaData.isNew[8])))
+		{
+			memcpy(&data->value.v_navi_local, &m_addr->shm_metaData.s_navi_local, sizeof(MetaLocalNavigation_t));
+			data->timestamp = m_addr->shm_metaData.timestamps[8];
+			if(isGettingNewData && m_addr->shm_metaData.isNew[8])
+				m_addr->shm_metaData.isNew[8] = false;
+
+			result = true;
+		}
+		Unlock(&m_addr->shm_metaData.locks[8]);
+		break;
 //	case MetaData::META_HOKUYO_POINTS:
 //		if(index >= 0 && index <= 1)
 //		{
@@ -352,6 +374,7 @@ bool SharedObjectsImpl::GetRecoData(RecoData_t* data, bool isGettingNewData)
 // Marker
 bool SharedObjectsImpl::SetMarker(const MarkerData_t& data)
 {
+	//LOG_INFO("m_addr=%p, type=%d", m_addr, data.type - 1);
 	if(m_addr == NULL || data.type <= 0 || data.type >= MarkerData::MARKER_MAX)
 		return false;
 
@@ -395,11 +418,15 @@ bool SharedObjectsImpl::SetMarker(const MarkerData_t& data)
 	case MarkerData::MARKER_OBSTACLE_LUX:
 		memcpy(&m_addr->shm_markers.s_obstacleLux, &data.value.v_obstacleLux, sizeof(MarkerObstacleLux_t));
 		break;
+	case MarkerData::MARKER_TL:
+		memcpy(&m_addr->shm_markers.s_tl, &data.value.v_tl, sizeof(MarkerTrafficLight_t));
+		break;
 	default:
 		break;
 	};
 
 	m_addr->shm_markers.isValid[index] = true;
+	//LOG_INFO("index=%d, value=%d", index, m_addr->shm_markers.isValid[index]);
 	Unlock(&m_addr->shm_markers.locks[index]);
 	return true;
 }
@@ -413,6 +440,7 @@ bool SharedObjectsImpl::GetMarker(MarkerData_t* data)
 	bool result = true;
 
 	Lock(&m_addr->shm_markers.locks[index]);
+	//LOG_INFO("index=%d value=%d", index, m_addr->shm_markers.isValid[index]);
 	if(m_addr->shm_markers.isValid[index])
 	{
 		switch(data->type)
@@ -452,6 +480,8 @@ bool SharedObjectsImpl::GetMarker(MarkerData_t* data)
 			break;
 		case MarkerData::MARKER_OBSTACLE_LUX:
 			memcpy(&data->value.v_obstacleLux, &m_addr->shm_markers.s_obstacleLux, sizeof(MarkerObstacleLux_t));
+		case MarkerData::MARKER_TL:
+			memcpy(&data->value.v_tl, &m_addr->shm_markers.s_tl, sizeof(MarkerTrafficLight_t));
 			break;
 		default:
 			result = false;
@@ -465,30 +495,55 @@ bool SharedObjectsImpl::GetMarker(MarkerData_t* data)
 	return result;
 }
 
-void SharedObjectsImpl::Lock(pthread_spinlock_t* lock)
+bool SharedObjectsImpl::SetSmartMarker(int index)
+{
+	if(m_addr == NULL || index < 1 || index > 10)
+		return false;
+
+	Lock(&m_addr->shm_smartMarkers.locks[index - 1]);
+	m_addr->shm_smartMarkers.isValid[index - 1] = true;
+	m_addr->shm_smartMarkers.isNew[index - 1] = true;
+	Unlock(&m_addr->shm_smartMarkers.locks[index - 1]);
+	return true;
+}
+
+bool SharedObjectsImpl::GetSmartMarker(int index, bool isGettingNewData)
+{
+	if(m_addr == NULL || index < 1 || index > 10)
+		return false;
+
+	bool result = false;
+	Lock(&m_addr->shm_smartMarkers.locks[index - 1]);
+	if(m_addr->shm_smartMarkers.isValid[index - 1]
+	        && (!isGettingNewData || (isGettingNewData && m_addr->shm_smartMarkers.isNew[index - 1])))
+	{
+		if(isGettingNewData && m_addr->shm_smartMarkers.isNew[index - 1])
+			m_addr->shm_smartMarkers.isNew[index - 1] = false;
+
+		result = true;
+	}
+	Unlock(&m_addr->shm_smartMarkers.locks[index - 1]);
+	return result;
+}
+
+inline void SharedObjectsImpl::Lock(pthread_spinlock_t* lock)
 {
 	sigset_t newset;
 	sigemptyset(&newset);
 	sigaddset(&newset, SIGINT);
-	if(sigprocmask(SIG_BLOCK, &newset, NULL) < 0)
-	{
-		LOG_ERROR_WITH_NO("sigprocmask");
-	}
+	sigprocmask(SIG_BLOCK, &newset, NULL);
 
 	pthread_spin_lock(lock);
 }
 
-void SharedObjectsImpl::Unlock(pthread_spinlock_t* lock)
+inline void SharedObjectsImpl::Unlock(pthread_spinlock_t* lock)
 {
 	pthread_spin_unlock(lock);
 
 	sigset_t newset;
 	sigemptyset(&newset);
 	sigaddset(&newset, SIGINT);
-	if(sigprocmask(SIG_UNBLOCK, &newset, NULL) < 0)
-	{
-		LOG_ERROR_WITH_NO("sigprocmask");
-	}
+	sigprocmask(SIG_UNBLOCK, &newset, NULL);
 }
 }
 }

@@ -30,6 +30,7 @@ struct SharedDecision
 struct SharedMetaData
 {
 	MetaNavigation_t s_navi;
+	MetaLocalNavigation_t s_navi_local;
 	MetaLaserHdl_t s_laserHdl;
 	MetaCameraBW_t s_cameraBW[3];
 	MetaCameraC_t s_cameraC;
@@ -37,10 +38,10 @@ struct SharedMetaData
 	MetaLUXObjects_t s_luxObjs;
 //	MetaHokuyoPoints_t s_hokuyoPts[2];
 //	MetaHokuyoObjects_t s_hokuyoObjs[2];
-	bool isValid[8];
-	bool isNew[8];
-	struct timeval timestamps[8];
-	pthread_spinlock_t locks[8];
+	bool isValid[9];
+	bool isNew[9];
+	struct timeval timestamps[9];
+	pthread_spinlock_t locks[9];
 };
 
 struct SharedRecoData
@@ -70,8 +71,16 @@ struct SharedMarkers
 	MarkerLaneChangeSide_t s_lanechangeside;
 	MarkerObstacle_t s_obstacle;
 	MarkerObstacleLux_t s_obstacleLux;
+	MarkerTrafficLight_t s_tl;
 	bool isValid[MarkerData::MARKER_MAX - 1];
 	pthread_spinlock_t locks[MarkerData::MARKER_MAX - 1];
+};
+
+struct SharedSmartMarkers
+{
+	bool isValid[SHM_SMART_MARKER_NUM];
+	bool isNew[SHM_SMART_MARKER_NUM];
+	pthread_spinlock_t locks[10];
 };
 
 struct SharedMemory
@@ -80,6 +89,7 @@ struct SharedMemory
 	struct SharedMetaData shm_metaData;
 	struct SharedRecoData shm_recoData;
 	struct SharedMarkers shm_markers;
+	struct SharedSmartMarkers shm_smartMarkers;
 };
 
 class SharedObjectsImpl : public SharedObjects
@@ -87,8 +97,8 @@ class SharedObjectsImpl : public SharedObjects
 protected:
 	struct SharedMemory* m_addr;
 
-	inline void Lock(pthread_spinlock_t* lock);
-	inline void Unlock(pthread_spinlock_t* lock);
+	static inline void Lock(pthread_spinlock_t* lock);
+	static inline void Unlock(pthread_spinlock_t* lock);
 
 public:
 	bool GetDecision(Decision_t* decision);
@@ -98,10 +108,13 @@ public:
 	bool GetMetaData(MetaData* data, int index = 0, bool isGettingNewData = false);
 
 	bool SetRecoData(const RecoData_t& data);
-	bool GetRecoData(RecoData_t* data, bool isGettingNewData);
+	bool GetRecoData(RecoData_t* data, bool isGettingNewData = false);
 
 	bool SetMarker(const MarkerData_t& data);
 	bool GetMarker(MarkerData_t* data);
+
+	bool SetSmartMarker(int index);
+	bool GetSmartMarker(int index, bool isNew = false);
 };
 
 }

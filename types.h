@@ -12,8 +12,8 @@ namespace module
  */
 //Ibeo(LUX) meta data size
 #define LUX_MAX_POINTS         11360
-#define LUX_MAX_OBJECTS        64
-#define LUX_MAX_CONTOURPOINTS  16
+#define LUX_MAX_OBJECTS        256
+#define LUX_MAX_CONTOURPOINTS  256
 // HDL meta point number
 #define HDL_LASER_NUMBER       64
 #define HDL_MAX_POINT_LASER    4000
@@ -23,8 +23,8 @@ namespace module
 #define BWCAM_IMAGE_HEIGHT     582
 #define BWCAM_IMAGE_SIZE BWCAM_IMAGE_WIDTH * BWCAM_IMAGE_HEIGHT
 // Color(C) camera meta data size
-#define CCAM_IMAGE_WIDTH       1292
-#define CCAM_IMAGE_HEIGHT      964
+#define CCAM_IMAGE_WIDTH       748
+#define CCAM_IMAGE_HEIGHT      480
 #define C_WIDTH                3
 #define CCAM_IMAGE_SIZE CCAM_IMAGE_WIDTH * CCAM_IMAGE_HEIGHT * C_WIDTH
 // Ibeo(ASL) meta data size
@@ -38,6 +38,13 @@ namespace module
 /****************************************************
  * Decision Structure (controller <--> decision)
  */
+typedef struct GuidePts
+{
+	double x;
+	double y;
+	double z;
+} GuidePts_t;
+
 typedef struct Decision
 {
 	bool isOverride;
@@ -74,6 +81,10 @@ typedef struct Decision
 	    INTERSECTION_RIGHT   = 2,
 	    INTERSECTION_FORWARD = 3
 	} Options;
+	struct BehaviorData
+	{
+		GuidePts_t guidePts;
+	} Data;
 	struct timeval timestamp;
 	void SetTimeStamp()
 	{
@@ -97,17 +108,19 @@ typedef struct MetaNavigation
 	double COV[3];
 	double TMbr[4][4];
 	double org_xyz[3];
-	struct timeval timestamp;
-	void SetTimeStamp()
-	{
-		gettimeofday(&timestamp, NULL);
-	}
 	double GetVelocity()
 	{
 		return sqrt(pow(Velocity[0], 2) + pow(Velocity[1], 2));
 	}
 } MetaNavigation_t;
 #pragma pack ()
+
+typedef struct MetaLocalNavigation
+{
+	double T[3][3];
+	double UGVtoFCF[3];
+	int counter;
+} MetaLocalNavigation_t;
 
 typedef struct LUXPoint
 {
@@ -285,14 +298,16 @@ typedef struct MetaData
 	    META_CAMERA_BW      = 2,
 	    META_CAMERA_C       = 3,
 	    META_NAVIGATION     = 4,
-	    META_LUX_POINTS     = 5,
-	    META_LUX_OBJECTS    = 6,
+		META_LOCAL_NAVIGATION = 5,
+	    META_LUX_POINTS       = 6,
+	    META_LUX_OBJECTS    = 7,
 //	    META_HOKUYO_POINTS  = 7,
 //	    META_HOKUYO_OBJECTS = 8
 	} type;
 	union
 	{
 		MetaNavigation_t v_navi;
+		MetaLocalNavigation_t v_navi_local;
 		MetaLaserHdl_t v_laserHdl;
 		MetaCameraBW_t v_cameraBW;
 		MetaCameraC v_cameraC;
@@ -497,6 +512,13 @@ typedef struct MarkerLaneChangeObstacle
 	bool hasLeftObstacle;
 	bool hasRightObstacle;
 } MarkerLaneChangeObstacle_t;
+typedef struct MarkerTrafficLight
+{
+	int TrafficLights[10][4];
+	int result_length;
+	unsigned char pattern[10][5400];
+} MarkerTrafficLight_t;
+
 typedef struct MarkerData
 {
 	enum MarkerDataType
@@ -513,7 +535,8 @@ typedef struct MarkerData
 	    MARKER_LANECHANGE_SIDE     = 10,
 	    MARKER_OBSTACLE            = 11,
 		MARKER_OBSTACLE_LUX        = 12,
-	    MARKER_MAX                 = 13
+		MARKER_TL                  = 13,
+	    MARKER_MAX                 = 14
 	} type;
 	union
 	{
@@ -529,6 +552,7 @@ typedef struct MarkerData
 		MarkerLaneChangeSide_t v_lanechangeside;
 		MarkerObstacle_t v_obstacle;
 		MarkerObstacleLux_t v_obstacleLux;
+		MarkerTrafficLight_t v_tl;
 	} value;
 } MarkerData_t;
 }

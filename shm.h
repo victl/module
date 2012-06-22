@@ -13,6 +13,9 @@ namespace shm
 // useful objects
 #define SHARED_OBJECTS SharedObjects::GetInstance()
 
+// smart marker number
+#define SHM_SMART_MARKER_NUM 10
+
 // SharedObject Class Definition
 class SharedObjects
 {
@@ -69,6 +72,13 @@ public:
 	 */
 	virtual bool SetMarker(const MarkerData_t& data) = 0;
 	virtual bool GetMarker(MarkerData_t* data) = 0;
+
+	/*
+	 * SET/GET smart markers
+	 * Note: Callers should set the marker index from 1 to SHM_SMART_MARKER_NUM
+	 */
+	virtual bool SetSmartMarker(int index) = 0;
+	virtual bool GetSmartMarker(int index, bool isNew = false) = 0;
 };
 
 }

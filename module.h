@@ -27,16 +27,18 @@ enum
 	// navigation
 	MODULE_NAV_GPS                   = 11,
 	MODULE_NAV_GPS_SHOW              = 12,
+	MODULE_NAV_LOCAL                 = 13,
 
 	// basic functions (without decision)
-	MODULE_TRAFFICSIGN_RECOGNITION   = 13,
-	MODULE_TRAFFICLIGHT_RECOGNITION  = 14,
-	MODULE_ROAD_TRACKING             = 15,
-	MODULE_VEHICLE_FOLLOWING         = 16,
-	MODULE_S_CURVE                   = 17,
-	MODULE_PARKING_1                 = 18,
-	MODULE_SIDE_PARKING              = 19,
-	MODULE_CHANGE_PATH				 = 20
+	MODULE_TRAFFICSIGN_RECOGNITION   = 14,
+	MODULE_TRAFFICLIGHT_RECOGNITION  = 15,
+	MODULE_ROAD_TRACKING             = 16,
+	MODULE_INTERSECTION              = 17,
+	MODULE_VEHICLE_FOLLOWING         = 18,
+	MODULE_S_CURVE                   = 19,
+	MODULE_PARKING_1                 = 20,
+	MODULE_SIDE_PARKING              = 21,
+	MODULE_CHANGE_PATH				 = 22
 };
 
 // utils macro
@@ -63,11 +65,13 @@ enum
 
 #define MODULE_NAV_GPS_NAME                   "./ModuleNavGps"
 #define MODULE_NAV_GPS_SHOW_NAME              "./ModuleNavGpsShow"
+#define MODULE_NAV_LOCAL_NAME                 "./ModuleNavLocal"
 
 #define MODULE_TRAFFICSIGN_RECOGNITION_NAME   "./ModuleTS"
 #define MODULE_TRAFFICLIGHT_RECOGNITION_NAME  "./ModuleTL"
 
 #define MODULE_ROAD_TRACKING_NAME             "./ModuleRoadTracking"
+#define MODULE_INTERSECTION_NAME              "./ModuleIntersection"
 #define MODULE_VEHICLE_FOLLOWING_NAME         "./ModuleVF"
 #define MODULE_S_CURVE_NAME                   "./ModuleSC"
 #define MODULE_PARKING_1_NAME                 "./ModuleP1"

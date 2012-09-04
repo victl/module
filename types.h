@@ -27,6 +27,8 @@ namespace module
 #define CCAM_IMAGE_HEIGHT      480
 #define C_WIDTH                3
 #define CCAM_IMAGE_SIZE CCAM_IMAGE_WIDTH * CCAM_IMAGE_HEIGHT * C_WIDTH
+// decision guide pts num
+#define MAX_GUIDE_PTS          10
 // Ibeo(ASL) meta data size
 //#define ASL_MAX_POINTS 8648
 //#define ASL_MAX_CONTOURPOINTS	16
@@ -83,7 +85,8 @@ typedef struct Decision
 	} Options;
 	struct BehaviorData
 	{
-		GuidePts_t guidePts;
+		GuidePts_t guidePts[MAX_GUIDE_PTS];
+		int num;
 	} Data;
 	struct timeval timestamp;
 	void SetTimeStamp()
@@ -227,21 +230,25 @@ typedef struct LPoint
 	unsigned char i;
 	unsigned char c;
 } LPoint_t;
+
 typedef struct MetaLaserHdl
 {
 	int pts_count;
 	LPoint_t pts[HDL_MAX_POINT_NUMBER];
 } MetaLaserHdl_t;
+
 // Black-White(BW) Camera Meta Data
 typedef struct MetaCameraBW
 {
 	unsigned char mdata[BWCAM_IMAGE_SIZE];
 } MetaCameraBW_t;
+
 // Color(C) Camera Meta Data
 typedef struct MetaCameraC
 {
 	unsigned char mdata[CCAM_IMAGE_SIZE];
 } MetaCameraC_t;
+
 // Hokuyo Meta Data
 //typedef struct MetaHokuyoPoints
 //{
@@ -342,6 +349,7 @@ typedef struct RecoStopLine  // RecoType=RT_STOPLINE
 	double angle;
 	double distance;
 } RecoStopLine_t;
+
 // Traffic Light
 typedef struct RecoTrafficLight  // RecoType=RT_TRAFFICLIGHT
 {
@@ -353,6 +361,7 @@ typedef struct RecoTrafficLight  // RecoType=RT_TRAFFICLIGHT
 	    TRL_GREEN  = 3
 	} type;
 } RecoTrafficLight_t;
+
 // traffic sign 1
 typedef struct RecoTrafficSign  // RecoType=RT_TRAFFICSIGN
 {
@@ -390,6 +399,7 @@ typedef struct RecoTrafficSign  // RecoType=RT_TRAFFICSIGN
 	} type;
 	int position;
 } RecoTrafficSign_t;
+
 // road tracking (ld&ad)
 typedef struct RecoTrackLdAd   // RecoType=RT_TRACK_LDAD
 {
@@ -399,6 +409,32 @@ typedef struct RecoTrackLdAd   // RecoType=RT_TRACK_LDAD
 	double curbwidth;
 	double curvature;
 } RecoTrackLdAd_t;
+
+// car following & lane changing
+typedef struct RecoSlowDown
+{
+	double velocity;
+	double distance;
+	enum
+	{
+		SL_FOLLOW    = 1,
+		SL_CANCHANGE = 2
+	} option;
+} RecoSlowDown_t;
+
+// emergcy
+typedef struct RecoEmergency
+{
+	int level;
+} RecoEmergency_t;
+
+// obstacle detection
+typedef struct RecoSideObs
+{
+	bool hasLeftObstacle;
+	bool hasRightObstacle;
+} RecoSideObs_t;
+
 typedef struct RecoData
 {
 	enum RecoDataType
@@ -407,7 +443,10 @@ typedef struct RecoData
 	    RT_TRAFFICSIGN  = 2,
 	    RT_TRAFFICLIGHT = 3,
 	    RT_TRACK_LDAD   = 4,
-	    RT_MAX          = 5
+		RT_SLOWDOWN     = 5,
+		RT_EMERGENCY    = 6,
+		RT_SIDEOBS      = 7,
+	    RT_MAX          = 8
 	} type;
 	union RecoDataValue
 	{
@@ -415,6 +454,9 @@ typedef struct RecoData
 		RecoTrafficSign_t v_ts;
 		RecoTrafficLight_t v_tl;
 		RecoTrackLdAd_t v_trackLdAd;
+		RecoSlowDown_t v_slowdown;
+		RecoEmergency_t v_emergency;
+		RecoSideObs_t v_sideObs;
 	} value;
 	struct timeval timestamp;
 	double belief;
@@ -438,46 +480,54 @@ typedef struct MarkerNavigation   // MarkerType=MARKER_NAVIGATION
 	double distance;
 	double theta;
 } MarkerNavi_t;
+
 // intersection state: roadtracking <=> decision
 typedef struct MarkerIntersection
 {
 	bool isFinished;
 } MarkerIntersection_t;
+
 // taillight image: HDL => TailLight
-typedef struct MarkerTaillightImage
-{
-	int x;
-	int y;
-	int width;
-	int height;
-} MarkerTaillightImage_t;
+//typedef struct MarkerTaillightImage
+//{
+//	int x;
+//	int y;
+//	int width;
+//	int height;
+//} MarkerTaillightImage_t;
+
 // emergency
-typedef struct MarkerObstacle
-{
-	int level;
-} MarkerObstacle_t;
+//typedef struct MarkerObstacle
+//{
+//	int level;
+//} MarkerObstacle_t;
+
 typedef struct MarkerObstacleLux
 {
 	int level;
 } MarkerObstacleLux_t;
+
 // hokuyo->HDL
-typedef struct MarkerHokuyoObs // MarkerType=MARKER_HOKUYO_OBS
-{
-	bool left;
-	bool right;
-	bool back;
-} MarkerHokuyoObs_t;
+//typedef struct MarkerHokuyoObs // MarkerType=MARKER_HOKUYO_OBS
+//{
+//	bool left;
+//	bool right;
+//	bool back;
+//} MarkerHokuyoObs_t;
+
 // velocity dec: ibeo => decision
-typedef struct MarkerVelocityDec
-{
-	double delta_v; // alway be no greater than 0
-	int flag; // 1 = slow down, 0 = do nothing
-} MarkerVelocityDec_t;
+//typedef struct MarkerVelocityDec
+//{
+//	double delta_v; // alway be no greater than 0
+//	int flag; // 1 = slow down, 0 = do nothing
+//} MarkerVelocityDec_t;
+
 typedef struct MarkerVelocityDecLux
 {
 	double delta_v; // alway be no greater than 0
 	int flag; // 1 = slow down, 0 = do nothing
 } MarkerVelocityDecLux_t;
+
 // obstacle: track => obstacle
 typedef struct MarkerParabola
 {
@@ -486,6 +536,7 @@ typedef struct MarkerParabola
 	double c[4];
 	double belief[4];
 } MarkerParabola_t;
+
 typedef struct MarkerLaneChange
 {
 	enum LaneChangeState
@@ -495,23 +546,21 @@ typedef struct MarkerLaneChange
 	    LCS_RUNNING  = 3,
 	    LCS_FAILED   = 4
 	} state;
-	double ld;
-	double ad;
-} MarkerLaneChange_t;
-typedef struct MarkerLaneChangeSide
-{
+
 	enum LaneChangeSide
 	{
 	    LC_LEFT    = 1,
 	    LC_RIGHT   = 2,
 	    LC_UNKNOWN = 3
 	} side;
-} MarkerLaneChangeSide_t;
+} MarkerLaneChange_t;
+
 typedef struct MarkerLaneChangeObstacle
 {
 	bool hasLeftObstacle;
 	bool hasRightObstacle;
 } MarkerLaneChangeObstacle_t;
+
 typedef struct MarkerTrafficLight
 {
 	int TrafficLights[10][4];
@@ -525,32 +574,32 @@ typedef struct MarkerData
 	{
 	    MARKER_NAVIGATION          = 1,
 	    MARKER_INTERSECTION        = 2,
-	    MARKER_TAILLIGHT_IMAGE 	   = 3,
-	    MARKER_HOKUYO_OBS          = 4,
-	    MARKER_VELOCITY_DEC        = 5,
-		MARKER_VELOCITY_DEC_LUX    = 6,
-	    MARKER_LANECHANGE          = 7,
-	    MARKER_PARABOLA            = 8,
-	    MARKER_LANECHANGE_OBSTACLE = 9,
-	    MARKER_LANECHANGE_SIDE     = 10,
-	    MARKER_OBSTACLE            = 11,
-		MARKER_OBSTACLE_LUX        = 12,
-		MARKER_TL                  = 13,
-	    MARKER_MAX                 = 14
+//	    MARKER_TAILLIGHT_IMAGE 	   = 3,
+//	    MARKER_HOKUYO_OBS          = 4,
+//	    MARKER_VELOCITY_DEC        = 5,
+		MARKER_VELOCITY_DEC_LUX    = 3,
+	    MARKER_LANECHANGE          = 4,
+	    MARKER_PARABOLA            = 5,
+	    MARKER_LANECHANGE_OBSTACLE = 6,
+//	    MARKER_LANECHANGE_SIDE     = 10,
+//	    MARKER_OBSTACLE            = 11,
+		MARKER_OBSTACLE_LUX        = 7,
+		MARKER_TL                  = 8,
+	    MARKER_MAX                 = 9
 	} type;
 	union
 	{
 		MarkerNavi_t v_navi;
 		MarkerIntersection_t v_intersection;
-		MarkerTaillightImage_t v_taillightImage;
-		MarkerHokuyoObs_t v_hokuyoobs;
-		MarkerVelocityDec_t v_velocityDec;
+//		MarkerTaillightImage_t v_taillightImage;
+//		MarkerHokuyoObs_t v_hokuyoobs;
+//		MarkerVelocityDec_t v_velocityDec;
 		MarkerVelocityDecLux_t v_velocityDecLux;
 		MarkerLaneChange_t v_lanechange;
 		MarkerParabola_t v_parabola;
 		MarkerLaneChangeObstacle_t v_lanechangeobstacle;
-		MarkerLaneChangeSide_t v_lanechangeside;
-		MarkerObstacle_t v_obstacle;
+//		MarkerLaneChangeSide_t v_lanechangeside;
+//		MarkerObstacle_t v_obstacle;
 		MarkerObstacleLux_t v_obstacleLux;
 		MarkerTrafficLight_t v_tl;
 	} value;

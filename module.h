@@ -12,38 +12,38 @@ enum
 	// decision
 	MODULE_DECISION                  = 1,
 	// emergency
-	MODULE_EMERGENCY                 = 2,
-	MODULE_EMERGENCY_LUX             = 3,
+//	MODULE_EMERGENCY                 = 2,
+	MODULE_EMERGENCY_LUX             = 2,
 	// slowdown
-	MODULE_SLOWDOWN                  = 4,
-	MODULE_SLOWDOWN_LUX              = 5,
+//	MODULE_SLOWDOWN                  = 4,
+	MODULE_SLOWDOWN_LUX              = 3,
 	// device capture meta data
-	MODULE_CAPTURE_HDL               = 6,
-	MODULE_CAPTURE_PYLON             = 7,
-	MODULE_CAPTURE_PYLON_MONO        = 8,
-	MODULE_CAPTURE_HOKUYO            = 9,
-	MODULE_CAPTURE_LUX               = 10,
+	MODULE_CAPTURE_HDL               = 4,
+	MODULE_CAPTURE_PYLON             = 5,
+	MODULE_CAPTURE_PYLON_MONO        = 6,
+	MODULE_CAPTURE_HOKUYO            = 7,
+	MODULE_CAPTURE_LUX               = 8,
 
 	// navigation
-	MODULE_NAV_GPS                   = 11,
-	MODULE_NAV_GPS_SHOW              = 12,
-	MODULE_NAV_LOCAL                 = 13,
+	MODULE_NAV_GPS                   = 9,
+	MODULE_NAV_GPS_SHOW              = 10,
+	MODULE_NAV_LOCAL                 = 11,
 
 	// basic functions (without decision)
-	MODULE_TRAFFICSIGN_RECOGNITION   = 14,
-	MODULE_TRAFFICLIGHT_RECOGNITION  = 15,
-	MODULE_ROAD_TRACKING             = 16,
-	MODULE_INTERSECTION              = 17,
-	MODULE_VEHICLE_FOLLOWING         = 18,
-	MODULE_S_CURVE                   = 19,
-	MODULE_PARKING_1                 = 20,
-	MODULE_SIDE_PARKING              = 21,
-	MODULE_CHANGE_PATH				 = 22
+	MODULE_TRAFFICSIGN_RECOGNITION   = 12,
+	MODULE_TRAFFICLIGHT_RECOGNITION  = 13,
+	MODULE_ROAD_TRACKING             = 14,
+//	MODULE_INTERSECTION              = 17,
+//	MODULE_VEHICLE_FOLLOWING         = 18,
+//	MODULE_S_CURVE                   = 19,
+//	MODULE_PARKING_1                 = 20,
+//	MODULE_SIDE_PARKING              = 21,
+//	MODULE_CHANGE_PATH				 = 22
 };
 
 // utils macro
 #define MODULE_INDEX_MIN MODULE_CONTROLLER
-#define MODULE_INDEX_MAX MODULE_CHANGE_PATH
+#define MODULE_INDEX_MAX MODULE_ROAD_TRACKING
 #define MODULE_NUM (MODULE_INDEX_MAX - MODULE_INDEX_MIN + 1)
 
 /*
@@ -52,9 +52,9 @@ enum
  */
 #define MODULE_CONTROLLER_NAME                "./ModuleController"
 #define MODULE_DECISION_NAME                  "./ModuleDecision"
-#define MODULE_EMERGENCY_NAME                 "./ModuleEmergency"
+//#define MODULE_EMERGENCY_NAME                 "./ModuleEmergency"
 #define MODULE_EMERGENCY_LUX_NAME             "./ModuleEmergencyLux"
-#define MODULE_SLOWDOWN_NAME                  "./ModuleSlowDown"
+//#define MODULE_SLOWDOWN_NAME                  "./ModuleSlowDown"
 #define MODULE_SLOWDOWN_LUX_NAME                  "./ModuleSlowDownLux"
 
 #define MODULE_CAPTURE_HDL_NAME               "./ModuleCapHdl"
@@ -69,15 +69,14 @@ enum
 
 #define MODULE_TRAFFICSIGN_RECOGNITION_NAME   "./ModuleTS"
 #define MODULE_TRAFFICLIGHT_RECOGNITION_NAME  "./ModuleTL"
-
 #define MODULE_ROAD_TRACKING_NAME             "./ModuleRoadTracking"
-#define MODULE_INTERSECTION_NAME              "./ModuleIntersection"
-#define MODULE_VEHICLE_FOLLOWING_NAME         "./ModuleVF"
-#define MODULE_S_CURVE_NAME                   "./ModuleSC"
-#define MODULE_PARKING_1_NAME                 "./ModuleP1"
-#define MODULE_SIDE_PARKING_NAME              "./ModuleSideParking"
+//#define MODULE_INTERSECTION_NAME              "./ModuleIntersection"
+//#define MODULE_VEHICLE_FOLLOWING_NAME         "./ModuleVF"
+//#define MODULE_S_CURVE_NAME                   "./ModuleSC"
+//#define MODULE_PARKING_1_NAME                 "./ModuleP1"
+//#define MODULE_SIDE_PARKING_NAME              "./ModuleSideParking"
 //#define MODULE_PARKING_2_NAME                 "./ModuleP2"
-#define MODULE_CHANGE_PATH_NAME               "./ModuleCP"
+//#define MODULE_CHANGE_PATH_NAME               "./ModuleCP"
 
 /*
  * define a cleanup handler called when interrupted or abort

@@ -388,15 +388,15 @@ bool SharedObjectsImpl::SetMarker(const MarkerData_t& data)
 	case MarkerData::MARKER_INTERSECTION:
 		memcpy(&m_addr->shm_markers.s_intersection, &data.value.v_intersection, sizeof(MarkerIntersection_t));
 		break;
-	case MarkerData::MARKER_TAILLIGHT_IMAGE:
-		memcpy(&m_addr->shm_markers.s_taillightImage, &data.value.v_taillightImage, sizeof(MarkerTaillightImage_t));
-		break;
-	case MarkerData::MARKER_HOKUYO_OBS:
-		memcpy(&m_addr->shm_markers.s_hokuyoobs, &data.value.v_hokuyoobs, sizeof(MarkerHokuyoObs_t));
-		break;
-	case MarkerData::MARKER_VELOCITY_DEC:
-		memcpy(&m_addr->shm_markers.s_velocityDec, &data.value.v_velocityDec, sizeof(MarkerVelocityDec_t));
-		break;
+//	case MarkerData::MARKER_TAILLIGHT_IMAGE:
+//		memcpy(&m_addr->shm_markers.s_taillightImage, &data.value.v_taillightImage, sizeof(MarkerTaillightImage_t));
+//		break;
+//	case MarkerData::MARKER_HOKUYO_OBS:
+//		memcpy(&m_addr->shm_markers.s_hokuyoobs, &data.value.v_hokuyoobs, sizeof(MarkerHokuyoObs_t));
+//		break;
+//	case MarkerData::MARKER_VELOCITY_DEC:
+//		memcpy(&m_addr->shm_markers.s_velocityDec, &data.value.v_velocityDec, sizeof(MarkerVelocityDec_t));
+//		break;
 	case MarkerData::MARKER_VELOCITY_DEC_LUX:
 		memcpy(&m_addr->shm_markers.s_velocityDecLux, &data.value.v_velocityDecLux, sizeof(MarkerVelocityDecLux_t));
 		break;
@@ -409,12 +409,12 @@ bool SharedObjectsImpl::SetMarker(const MarkerData_t& data)
 	case MarkerData::MARKER_LANECHANGE_OBSTACLE:
 		memcpy(&m_addr->shm_markers.s_lanechangeobstacle, &data.value.v_lanechangeobstacle, sizeof(MarkerLaneChangeObstacle_t));
 		break;
-	case MarkerData::MARKER_LANECHANGE_SIDE:
-		memcpy(&m_addr->shm_markers.s_lanechangeside, &data.value.v_lanechangeside, sizeof(MarkerLaneChangeSide_t));
-		break;
-	case MarkerData::MARKER_OBSTACLE:
-		memcpy(&m_addr->shm_markers.s_obstacle, &data.value.v_obstacle, sizeof(MarkerObstacle_t));
-		break;
+//	case MarkerData::MARKER_LANECHANGE_SIDE:
+//		memcpy(&m_addr->shm_markers.s_lanechangeside, &data.value.v_lanechangeside, sizeof(MarkerLaneChangeSide_t));
+//		break;
+//	case MarkerData::MARKER_OBSTACLE:
+//		memcpy(&m_addr->shm_markers.s_obstacle, &data.value.v_obstacle, sizeof(MarkerObstacle_t));
+//		break;
 	case MarkerData::MARKER_OBSTACLE_LUX:
 		memcpy(&m_addr->shm_markers.s_obstacleLux, &data.value.v_obstacleLux, sizeof(MarkerObstacleLux_t));
 		break;
@@ -451,15 +451,15 @@ bool SharedObjectsImpl::GetMarker(MarkerData_t* data)
 		case MarkerData::MARKER_INTERSECTION:
 			memcpy(&data->value.v_intersection, &m_addr->shm_markers.s_intersection, sizeof(MarkerIntersection_t));
 			break;
-		case MarkerData::MARKER_TAILLIGHT_IMAGE:
-			memcpy(&data->value.v_taillightImage, &m_addr->shm_markers.s_taillightImage, sizeof(MarkerTaillightImage_t));
-			break;
-		case MarkerData::MARKER_HOKUYO_OBS:
-			memcpy(&data->value.v_hokuyoobs, &m_addr->shm_markers.s_hokuyoobs, sizeof(MarkerHokuyoObs_t));
-			break;
-		case MarkerData::MARKER_VELOCITY_DEC:
-			memcpy(&data->value.v_velocityDec, &m_addr->shm_markers.s_velocityDec, sizeof(MarkerVelocityDec_t));
-			break;
+//		case MarkerData::MARKER_TAILLIGHT_IMAGE:
+//			memcpy(&data->value.v_taillightImage, &m_addr->shm_markers.s_taillightImage, sizeof(MarkerTaillightImage_t));
+//			break;
+//		case MarkerData::MARKER_HOKUYO_OBS:
+//			memcpy(&data->value.v_hokuyoobs, &m_addr->shm_markers.s_hokuyoobs, sizeof(MarkerHokuyoObs_t));
+//			break;
+//		case MarkerData::MARKER_VELOCITY_DEC:
+//			memcpy(&data->value.v_velocityDec, &m_addr->shm_markers.s_velocityDec, sizeof(MarkerVelocityDec_t));
+//			break;
 		case MarkerData::MARKER_VELOCITY_DEC_LUX:
 			memcpy(&data->value.v_velocityDecLux, &m_addr->shm_markers.s_velocityDecLux, sizeof(MarkerVelocityDecLux_t));
 			break;
@@ -472,14 +472,15 @@ bool SharedObjectsImpl::GetMarker(MarkerData_t* data)
 		case MarkerData::MARKER_LANECHANGE_OBSTACLE:
 			memcpy(&data->value.v_lanechangeobstacle, &m_addr->shm_markers.s_lanechangeobstacle, sizeof(MarkerLaneChangeObstacle_t));
 			break;
-		case MarkerData::MARKER_LANECHANGE_SIDE:
-			memcpy(&data->value.v_lanechangeside, &m_addr->shm_markers.s_lanechangeside, sizeof(MarkerLaneChangeSide_t));
-			break;
-		case MarkerData::MARKER_OBSTACLE:
-			memcpy(&data->value.v_obstacle, &m_addr->shm_markers.s_obstacle, sizeof(MarkerObstacle_t));
-			break;
+//		case MarkerData::MARKER_LANECHANGE_SIDE:
+//			memcpy(&data->value.v_lanechangeside, &m_addr->shm_markers.s_lanechangeside, sizeof(MarkerLaneChangeSide_t));
+//			break;
+//		case MarkerData::MARKER_OBSTACLE:
+//			memcpy(&data->value.v_obstacle, &m_addr->shm_markers.s_obstacle, sizeof(MarkerObstacle_t));
+//			break;
 		case MarkerData::MARKER_OBSTACLE_LUX:
 			memcpy(&data->value.v_obstacleLux, &m_addr->shm_markers.s_obstacleLux, sizeof(MarkerObstacleLux_t));
+			break;
 		case MarkerData::MARKER_TL:
 			memcpy(&data->value.v_tl, &m_addr->shm_markers.s_tl, sizeof(MarkerTrafficLight_t));
 			break;

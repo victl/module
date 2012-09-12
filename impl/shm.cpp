@@ -318,6 +318,9 @@ bool SharedObjectsImpl::SetRecoData(const RecoData_t& data)
 	case RecoData::RT_TRACK_LDAD:
 		memcpy(&m_addr->shm_recoData.s_trackLdAd, &data.value.v_trackLdAd, sizeof(RecoTrackLdAd_t));
 		break;
+	case RecoData::RT_SLOWDOWN:
+		memcpy(&m_addr->shm_recoData.s_slowdown, &data.value.v_slowdown, sizeof(RecoSlowDown_t));
+		break;
 	default:
 		break;
 	};
@@ -357,6 +360,9 @@ bool SharedObjectsImpl::GetRecoData(RecoData_t* data, bool isGettingNewData)
 			break;
 		case RecoData::RT_TRACK_LDAD:
 			memcpy(&data->value.v_trackLdAd, &m_addr->shm_recoData.s_trackLdAd, sizeof(RecoTrackLdAd_t));
+			break;
+		case RecoData::RT_SLOWDOWN:
+			memcpy(&data->value.v_slowdown, &m_addr->shm_recoData.s_slowdown, sizeof(RecoSlowDown_t));
 			break;
 		};
 

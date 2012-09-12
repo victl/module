@@ -50,6 +50,7 @@ struct SharedRecoData
 	RecoTrafficSign_t s_ts;
 	RecoTrafficLight_t s_tl;
 	RecoTrackLdAd_t s_trackLdAd;
+	RecoSlowDown_t s_slowdown;
 	bool isNew[RecoData::RT_MAX - 1];
 	bool isValid[RecoData::RT_MAX - 1];
 	struct timeval timestamps[RecoData::RT_MAX - 1];

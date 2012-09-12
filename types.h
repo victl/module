@@ -23,8 +23,8 @@ namespace module
 #define BWCAM_IMAGE_HEIGHT     582
 #define BWCAM_IMAGE_SIZE BWCAM_IMAGE_WIDTH * BWCAM_IMAGE_HEIGHT
 // Color(C) camera meta data size
-#define CCAM_IMAGE_WIDTH       748
-#define CCAM_IMAGE_HEIGHT      480
+#define CCAM_IMAGE_WIDTH       1292
+#define CCAM_IMAGE_HEIGHT      964
 #define C_WIDTH                3
 #define CCAM_IMAGE_SIZE CCAM_IMAGE_WIDTH * CCAM_IMAGE_HEIGHT * C_WIDTH
 // decision guide pts num
@@ -410,16 +410,16 @@ typedef struct RecoTrackLdAd   // RecoType=RT_TRACK_LDAD
 	double curvature;
 } RecoTrackLdAd_t;
 
-// car following & lane changing
+// lux car following & lane change
 typedef struct RecoSlowDown
 {
-	double velocity;
-	double distance;
 	enum
 	{
-		SL_FOLLOW    = 1,
-		SL_CANCHANGE = 2
-	} option;
+		SL_NONE   = 0,
+		SL_FOLLOW = 1,
+		SL_CHANGE = 2
+	} state;
+	double dv;
 } RecoSlowDown_t;
 
 // emergcy

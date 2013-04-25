@@ -31,19 +31,21 @@ enum
 
 	// basic functions (without decision)
 	MODULE_TRAFFICSIGN_RECOGNITION   = 12,
-	MODULE_TRAFFICLIGHT_RECOGNITION  = 13,
-	MODULE_ROAD_TRACKING             = 14,
-//	MODULE_INTERSECTION              = 17,
-//	MODULE_VEHICLE_FOLLOWING         = 18,
-//	MODULE_S_CURVE                   = 19,
-//	MODULE_PARKING_1                 = 20,
-//	MODULE_SIDE_PARKING              = 21,
-//	MODULE_CHANGE_PATH				 = 22
+	MODULE_TRAFFICLIGHT_1            = 13,
+	MODULE_TRAFFICLIGHT_2            = 14,
+	MODULE_ROAD_TRACKING             = 15,
+	MODULE_LANEMARK_SCANNER			 = 16,
+	MODULE_CURB_SCANNER			     = 17,
+	MODULE_RAIL_SCANNER				 = 18,
+	MODULE_INTERSECTION              = 19,
+	MODULE_LANECHANGE                = 20,
+	MODULE_GPSPLANNING               = 21,
+	MODULE_CHANGE_PATH				 = 22
 };
 
 // utils macro
 #define MODULE_INDEX_MIN MODULE_CONTROLLER
-#define MODULE_INDEX_MAX MODULE_ROAD_TRACKING
+#define MODULE_INDEX_MAX MODULE_CHANGE_PATH
 #define MODULE_NUM (MODULE_INDEX_MAX - MODULE_INDEX_MIN + 1)
 
 /*
@@ -68,15 +70,22 @@ enum
 #define MODULE_NAV_LOCAL_NAME                 "./ModuleNavLocal"
 
 #define MODULE_TRAFFICSIGN_RECOGNITION_NAME   "./ModuleTS"
-#define MODULE_TRAFFICLIGHT_RECOGNITION_NAME  "./ModuleTL"
+#define MODULE_TRAFFICLIGHT_1_NAME            "./ModuleSFTL"
+#define MODULE_TRAFFICLIGHT_2_NAME            "./ModuleTrackingTL"
 #define MODULE_ROAD_TRACKING_NAME             "./ModuleRoadTracking"
+#define MODULE_LANEMARK_SCANNER_NAME          "./ModuleLaneMarkScanner"
+#define MODULE_CURB_SCANNER_NAME              "./ModuleCurbScanner"
+#define MODULE_RAIL_SCANNER_NAME              "./ModuleRailScanner"
+#define MODULE_INTERSECTION_NAME              "./ModuleIntersection"
+#define MODULE_LANECHANGE_NAME                "./ModuleLaneChange"
+#define MODULE_GPSPLANNING_NAME               "./ModuleGPSPlanning"
 //#define MODULE_INTERSECTION_NAME              "./ModuleIntersection"
 //#define MODULE_VEHICLE_FOLLOWING_NAME         "./ModuleVF"
 //#define MODULE_S_CURVE_NAME                   "./ModuleSC"
 //#define MODULE_PARKING_1_NAME                 "./ModuleP1"
 //#define MODULE_SIDE_PARKING_NAME              "./ModuleSideParking"
 //#define MODULE_PARKING_2_NAME                 "./ModuleP2"
-//#define MODULE_CHANGE_PATH_NAME               "./ModuleCP"
+#define MODULE_CHANGE_PATH_NAME               "./ModuleCP"
 
 /*
  * define a cleanup handler called when interrupted or abort

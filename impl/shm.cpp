@@ -315,11 +315,35 @@ bool SharedObjectsImpl::SetRecoData(const RecoData_t& data)
 	case RecoData::RT_TRAFFICLIGHT:
 		memcpy(&m_addr->shm_recoData.s_tl, &data.value.v_tl, sizeof(RecoTrafficLight_t));
 		break;
-	case RecoData::RT_TRACK_LDAD:
-		memcpy(&m_addr->shm_recoData.s_trackLdAd, &data.value.v_trackLdAd, sizeof(RecoTrackLdAd_t));
-		break;
+	//case RecoData::RT_TRACK_LDAD:
+		//memcpy(&m_addr->shm_recoData.s_trackLdAd, &data.value.v_trackLdAd, sizeof(RecoTrackLdAd_t));
+		//break;
+        case RecoData::RT_TRACK_LOCALANDPREVIEW:
+                memcpy(&m_addr->shm_recoData.s_trackLocalAndPreview, &data.value.v_trackLocalAndPreview, sizeof(RecoTrackLocalAndPreview_t));
+                break;
 	case RecoData::RT_SLOWDOWN:
 		memcpy(&m_addr->shm_recoData.s_slowdown, &data.value.v_slowdown, sizeof(RecoSlowDown_t));
+		break;
+	case RecoData::RT_EMERGENCY:
+		memcpy(&m_addr->shm_recoData.s_emergency, &data.value.v_emergency, sizeof(RecoEmergency_t));
+		break;
+	case RecoData::RT_SIDEOBS:
+		memcpy(&m_addr->shm_recoData.s_sideObs, &data.value.v_sideObs, sizeof(RecoSideObs_t));
+		break;
+	case RecoData::RT_LANEMARK:
+		memcpy(&m_addr->shm_recoData.s_lanemark, &data.value.v_lanemark, sizeof(RecoLaneMark_t));
+		break;
+	case RecoData::RT_CURB:
+		memcpy(&m_addr->shm_recoData.s_curb, &data.value.v_curb, sizeof(RecoLaneMark_t));
+		break;
+	case RecoData::RT_RAIL:
+		memcpy(&m_addr->shm_recoData.s_rail, &data.value.v_rail, sizeof(RecoLaneMark_t));
+		break;
+	case RecoData::RT_SCURVE:
+		memcpy(&m_addr->shm_recoData.s_scurve, &data.value.v_scurve, sizeof(RecoSCurve_t));
+		break;
+	case RecoData::RT_GUIDE_PT:
+		memcpy(&m_addr->shm_recoData.s_guide_pt, &data.value.v_guide_pt, sizeof(Pose_t));
 		break;
 	default:
 		break;
@@ -358,11 +382,35 @@ bool SharedObjectsImpl::GetRecoData(RecoData_t* data, bool isGettingNewData)
 		case RecoData::RT_TRAFFICLIGHT:
 			memcpy(&data->value.v_tl, &m_addr->shm_recoData.s_tl, sizeof(RecoTrafficLight_t));
 			break;
-		case RecoData::RT_TRACK_LDAD:
-			memcpy(&data->value.v_trackLdAd, &m_addr->shm_recoData.s_trackLdAd, sizeof(RecoTrackLdAd_t));
-			break;
+		//case RecoData::RT_TRACK_LDAD:
+			//memcpy(&data->value.v_trackLdAd, &m_addr->shm_recoData.s_trackLdAd, sizeof(RecoTrackLdAd_t));
+			//break;
+                case RecoData::RT_TRACK_LOCALANDPREVIEW:
+                        memcpy(&data->value.v_trackLocalAndPreview, &m_addr->shm_recoData.s_trackLocalAndPreview, sizeof(RecoTrackLocalAndPreview_t));
+                        break;
 		case RecoData::RT_SLOWDOWN:
 			memcpy(&data->value.v_slowdown, &m_addr->shm_recoData.s_slowdown, sizeof(RecoSlowDown_t));
+			break;
+		case RecoData::RT_EMERGENCY:
+			memcpy(&data->value.v_emergency, &m_addr->shm_recoData.s_emergency, sizeof(RecoEmergency_t));
+			break;
+		case RecoData::RT_SIDEOBS:
+			memcpy(&data->value.v_sideObs, &m_addr->shm_recoData.s_sideObs, sizeof(RecoSideObs_t));
+			break;
+		case RecoData::RT_LANEMARK:
+			memcpy(&data->value.v_lanemark, &m_addr->shm_recoData.s_lanemark, sizeof(RecoLaneMark_t));
+			break;
+		case RecoData::RT_CURB:
+			memcpy(&data->value.v_curb, &m_addr->shm_recoData.s_curb, sizeof(RecoLaneMark_t));
+			break;
+		case RecoData::RT_RAIL:
+			memcpy(&data->value.v_rail, &m_addr->shm_recoData.s_rail, sizeof(RecoLaneMark_t));
+			break;
+		case RecoData::RT_SCURVE:
+			memcpy(&data->value.v_scurve, &m_addr->shm_recoData.s_scurve, sizeof(RecoSCurve_t));
+			break;
+		case RecoData::RT_GUIDE_PT:
+			memcpy(&data->value.v_guide_pt, &m_addr->shm_recoData.s_guide_pt, sizeof(Pose_t));
 			break;
 		};
 
@@ -427,6 +475,12 @@ bool SharedObjectsImpl::SetMarker(const MarkerData_t& data)
 	case MarkerData::MARKER_TL:
 		memcpy(&m_addr->shm_markers.s_tl, &data.value.v_tl, sizeof(MarkerTrafficLight_t));
 		break;
+	//case MarkerData::MARKER_INITSENSOR:
+	//	memcpy(&m_addr->shm_markers.s_initsensor, &data.value.v_initsensor, sizeof(MarkerInitSensor_t));
+	//	break;
+	case MarkerData::MARKER_ROADTRACKING:
+		memcpy(&m_addr->shm_markers.s_roadtracking, &data.value.v_roadtracking, sizeof(MarkerRoadTracking_t));
+		break;
 	default:
 		break;
 	};
@@ -489,6 +543,12 @@ bool SharedObjectsImpl::GetMarker(MarkerData_t* data)
 			break;
 		case MarkerData::MARKER_TL:
 			memcpy(&data->value.v_tl, &m_addr->shm_markers.s_tl, sizeof(MarkerTrafficLight_t));
+			break;
+		//case MarkerData::MARKER_INITSENSOR:
+		//	memcpy(&data->value.v_initsensor, &m_addr->shm_markers.s_initsensor, sizeof(MarkerInitSensor_t));
+		//	break;
+		case MarkerData::MARKER_ROADTRACKING:
+			memcpy(&data->value.v_roadtracking, &m_addr->shm_markers.s_roadtracking, sizeof(MarkerRoadTracking_t));
 			break;
 		default:
 			result = false;

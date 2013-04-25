@@ -49,8 +49,16 @@ struct SharedRecoData
 	RecoStopLine_t s_stopline;
 	RecoTrafficSign_t s_ts;
 	RecoTrafficLight_t s_tl;
-	RecoTrackLdAd_t s_trackLdAd;
+	//RecoTrackLdAd_t s_trackLdAd;
+	RecoTrackLocalAndPreview_t s_trackLocalAndPreview;
 	RecoSlowDown_t s_slowdown;
+	RecoEmergency_t s_emergency;
+	RecoSideObs_t s_sideObs;
+	RecoLaneMark_t s_lanemark;
+	RecoLaneMark_t s_curb;
+	RecoLaneMark_t s_rail;
+	RecoSCurve_t s_scurve;
+	Pose_t s_guide_pt;
 	bool isNew[RecoData::RT_MAX - 1];
 	bool isValid[RecoData::RT_MAX - 1];
 	struct timeval timestamps[RecoData::RT_MAX - 1];
@@ -73,6 +81,8 @@ struct SharedMarkers
 //	MarkerObstacle_t s_obstacle;
 	MarkerObstacleLux_t s_obstacleLux;
 	MarkerTrafficLight_t s_tl;
+//	MarkerInitSensor_t s_initsensor;
+	MarkerRoadTracking_t s_roadtracking;
 	bool isValid[MarkerData::MARKER_MAX - 1];
 	pthread_spinlock_t locks[MarkerData::MARKER_MAX - 1];
 };

@@ -9,8 +9,8 @@
   <Dependencies/>
   <VirtualDirectory Name="src">
     <VirtualDirectory Name="impl">
-      <File Name="impl/shm.cpp"/>
       <File Name="impl/factory.cpp"/>
+      <File Name="impl/shm.cpp"/>
     </VirtualDirectory>
     <File Name="log.cpp"/>
     <File Name="shm.cpp"/>
@@ -29,19 +29,43 @@
     <File Name="version.h"/>
     <File Name="utils.h"/>
   </VirtualDirectory>
-  <Dependencies Name="Debug"/>
-  <Dependencies Name="Release"/>
+  <VirtualDirectory Name="rndf">
+    <File Name="charpoint.cpp"/>
+    <File Name="charpoint.h"/>
+    <File Name="connection.cpp"/>
+    <File Name="connection.h"/>
+    <File Name="lane.cpp"/>
+    <File Name="lane.h"/>
+    <File Name="mem_map.cpp"/>
+    <File Name="mem_map.h"/>
+    <File Name="perimeter.cpp"/>
+    <File Name="perimeter.h"/>
+    <File Name="rndf.cpp"/>
+    <File Name="rndf.h"/>
+    <File Name="rndfobj.cpp"/>
+    <File Name="rndfobj.h"/>
+    <File Name="segment.cpp"/>
+    <File Name="segment.h"/>
+    <File Name="spot.cpp"/>
+    <File Name="spot.h"/>
+    <File Name="waypoint.cpp"/>
+    <File Name="waypoint.h"/>
+    <File Name="zone.cpp"/>
+    <File Name="zone.h"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="radarmap">
+    <File Name="radar_map.h"/>
+    <File Name="radar_map.cpp"/>
+  </VirtualDirectory>
   <Settings Type="Static Library">
     <GlobalSettings>
       <Compiler Options="-pthread" C_Options="-pthread">
         <IncludePath Value="."/>
         <Preprocessor Value="_REENTRANT"/>
       </Compiler>
-      <Linker Options="-pthread">
+      <Linker Options="-pthread;">
         <LibraryPath Value="."/>
-        <Library Value="opencv_imgproc"/>
-        <Library Value="opencv_core"/>
-        <Library Value="opencv_highgui"/>
+        <Library Value="rt"/>
       </Linker>
       <ResourceCompiler Options=""/>
     </GlobalSettings>
@@ -53,7 +77,9 @@
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="$(HOME)/UGV/libs/libmodule.a" IntermediateDirectory="./Debug" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
-        <![CDATA[]]>
+        <![CDATA[
+      
+      ]]>
       </Environment>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
         <PostConnectCommands/>
@@ -87,9 +113,50 @@
       </Compiler>
       <Linker Options="-O2" Required="yes"/>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="$(HOME)/UGV/libs/libmodule.a" IntermediateDirectory="./Release" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="$(HOME)/UGV/libs/libmodule.a" IntermediateDirectory="./Release" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(HOME)/UGV/" PauseExecWhenProcTerminates="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
       ]]>
       </Environment>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="">
@@ -119,4 +186,6 @@
       </Completion>
     </Configuration>
   </Settings>
+  <Dependencies Name="Debug"/>
+  <Dependencies Name="Release"/>
 </CodeLite_Project>

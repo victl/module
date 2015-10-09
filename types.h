@@ -6,6 +6,8 @@
 #include <vector>
 #include <math.h>
 #include <opencv/cv.h>
+#include <map>
+using namespace std;
 
 namespace module
 {
@@ -27,11 +29,82 @@ namespace module
 // Color(C) camera meta data size
 #define CCAM_IMAGE_WIDTH       1292
 #define CCAM_IMAGE_HEIGHT      964
+#define ROI_X                0.25
+#define ROI_Y                0
+#define ROI_W                0.5
+#define ROI_H                0.6
 #define C_WIDTH                3
 #define CCAM_IMAGE_SIZE CCAM_IMAGE_WIDTH * CCAM_IMAGE_HEIGHT * C_WIDTH
 // decision guide pts num
 #define MAX_GUIDE_PTS          10
 #define MAX_TARGET_PTS			200
+
+
+//动态栅格子地图
+#define SUB_MAP_LENGTH 801
+#define SUB_MAP_WIDTH  801
+
+//占用栅格集合
+
+#define MAX_OCCUPY_NUM 6000
+
+//栅格结构
+typedef struct mapGrid
+{
+	unsigned char p[3];			//使用3个字节表示
+} MapGrid_t;
+
+//东北冻结坐标系下栅格结构的定义
+typedef struct gridFXY
+{
+	float x, y;
+} gridFXY_t;
+
+//动态栅格子地图结构
+typedef struct RecoSubMap
+{
+	gridFXY_t left_down_grid;			//子地图中左下角栅格的全局坐标
+	MapGrid_t submap[SUB_MAP_LENGTH][SUB_MAP_WIDTH];
+} RecoSubMap_t;
+
+
+
+
+//全局地图中占用栅格结构的定义
+typedef struct occupy_grid
+{
+	int row;
+	int col;
+} occupy_grid_t;
+
+//占用栅格集合结构
+typedef struct RecoOccupyGrids
+{
+	bool interactive_flag;
+	unsigned int num;
+	occupy_grid_t occupy_grids[MAX_OCCUPY_NUM];
+} RecoOccupyGrids_t;
+
+
+
+//障碍物结构
+#define MAX_OBSTACLE_NUM 20
+
+typedef struct obstacle
+{
+	unsigned char type;			//类型
+	gridFXY_t anchor_pt;			//锚点
+	gridFXY_t bounding_box[4];		//包络盒的四个顶点
+	gridFXY_t velocity;				//速度
+} obstacle_t;
+
+typedef struct RecoObstacleList
+{
+	bool interactive_flag;
+	unsigned int num;			//障碍物的个数
+	obstacle_t obs[MAX_OBSTACLE_NUM];	//障碍物数组
+} RecoObstacleList_t;
+
 // Ibeo(ASL) meta data size
 //#define ASL_MAX_POINTS 8648
 //#define ASL_MAX_CONTOURPOINTS	16
@@ -43,65 +116,74 @@ namespace module
 /****************************************************
  * Decision Structure (controller <--> decision)
  */
-typedef struct GuidePts
-{
+typedef struct GuidePts {
 	double x;
 	double y;
 	double z;
 } GuidePts_t;
 
-typedef struct Pose{
+typedef struct Pose {
 	double x;
 	double y;
 	double eulr;
-}Pose_t;
+} Pose_t;
 
-typedef struct Decision
-{
+typedef struct Decision {
 	bool isOverride;
 	int currGuidePtIndex;
+	//bool inCurrGuidePt;
+	//bool outCurrGuidePt;
 	double LDevi;
 	double AzimuthDevi;
 	Pose_t localpt;
 	Pose_t previewpt;
 	double DesiredVelocity;
+	double PlanningVelocity;
 	double VehicleVelocity;
 	double Acceleration;
 	char Shift;
 	bool Leftlight;
 	bool Rightlight;
-	enum
-	{
+	enum {
 	    VS_START     = 1,
 	    VS_STOP      = 2,
 	    VS_PAUSE     = 3,
 	    VS_EMERGENCY = 4,
 	    VS_RUNNING   = 5
 	} State;
-	enum BehaviorType
-	{
+	enum BehaviorType {
 	    BEHAVIOR_ROADTRACKING   = 1,
 	    BEHAVIOR_CROSS          = 2,
 	    BEHAVIOR_LANE_CHANGE    = 3,
 	    BEHAVIOR_STOPLINE_PAUSE = 4,
-	    BEHAVIOR_MAX            = 5
+	    BEHAVIOR_STOP_ZONE = 5,
+		BEHAVIOR_SIGN_SIDEWALK = 6,
+		BEHAVIOR_SIGN_CONSTRUCT = 7,
+		BEHAVIOR_SIGN_LIMIT10 = 8,
+		BEHAVIOR_SIGN_LIMIT10_CANCLE = 9,
+		BEHAVIOR_SIGN_STOP = 10,
+		BEHAVIOR_SIGN_SCHOOL = 11,
+		BEHAVIOR_SIGN_UTURN = 12,
+		BEHAVIOR_SIGN_FORBID = 13,
+		BEHAVIOR_SIGN_PARK = 14,
+		BEHAVIOR_SLOWDOWN = 15,
+		BEHAVIOR_FOLLOW = 16,
+	    BEHAVIOR_MAX            = 17
 	} Behavior;
-	enum BehaviorProperty
-	{
+	enum BehaviorProperty {
 	    INTERSECTION_UNKNOWN = 0,
 	    INTERSECTION_LEFT    = 1,
 	    INTERSECTION_RIGHT   = 2,
 	    INTERSECTION_FORWARD = 3,
 	    INTERSECTION_UTURN   = 4
 	} Options;
-	struct BehaviorData
-	{
+	struct BehaviorData {
 		GuidePts_t guidePts[MAX_GUIDE_PTS];
+		//RoutePts_t routePts[MAX_GUIDE_PTS];
 		int num;
 	} Data;
 	struct timeval timestamp;
-	void SetTimeStamp()
-	{
+	void SetTimeStamp() {
 		gettimeofday(&timestamp, NULL);
 	}
 } Decision_t;
@@ -110,8 +192,7 @@ typedef struct Decision
  */
 // GPS Meta Data
 #pragma pack (4)
-typedef struct MetaNavigation
-{
+typedef struct MetaNavigation {
 	long int ID;
 	double ENU[3];
 	double Velocity[3];
@@ -124,26 +205,25 @@ typedef struct MetaNavigation
 	double org_xyz[3];
 	unsigned int count1;
 	unsigned int count2;
-	double GetVelocityIMU()
-	{
+	double GetVelocityIMU() {
 		return sqrt(pow(Velocity[0], 2) + pow(Velocity[1], 2));
 	}
-	double GetVelocityEncoder()
-	{
+	double GetVelocityEncoder() {
 		return V;
 	}
 } MetaNavigation_t;
 #pragma pack ()
 
-typedef struct MetaLocalNavigation
-{
+typedef struct MetaLocalNavigation {
 	double T[3][3];
+	Pose_t original_pt;
+	Pose_t last_local_pt;
+	double new_original_eulr;
 	double UGVtoFCF[3];
 	int counter;
 } MetaLocalNavigation_t;
 
-typedef struct LUXPoint
-{
+typedef struct LUXPoint {
 	float m_x;
 	float m_y;
 	float m_z;
@@ -161,8 +241,7 @@ typedef struct LUXPoint
 } LUXPoint_t;
 
 // Ibeo(LUX) MetaPoints
-typedef struct MetaLUXPoints
-{
+typedef struct MetaLUXPoints {
 	float m_startAngle;
 	float m_endAngle;
 	unsigned int m_scannerStatus;
@@ -174,15 +253,12 @@ typedef struct MetaLUXPoints
 	LUXPoint_t m_pts[LUX_MAX_POINTS];
 } MetaLUXPoints_t;
 
-typedef struct LUXObject
-{
-	struct LUXPoint2D
-	{
+typedef struct LUXObject {
+	struct LUXPoint2D {
 		float m_x;
 		float m_y;
 	};
-	enum ObjectClassification
-	{
+	enum ObjectClassification {
 	    Unclassified = 0, ///< = 0: No classification determined (yet)
 	    UnknownSmall = 1, ///< = 1: Relatively small structure like pole, tree, single bush, etc. which does not fit to other classes.
 	    UnknownBig = 2, ///< = 2: Bigger structure which does not fit other classes.
@@ -230,15 +306,13 @@ typedef struct LUXObject
 } LUXObject_t;
 
 // Ibeo(LUX) MetaObjects
-typedef struct MetaLUXObjects
-{
+typedef struct MetaLUXObjects {
 	unsigned int m_uObjects;
 	LUXObject_t obj[LUX_MAX_OBJECTS];
 } MetaLUXObjects_t;
 
 // HDL Laser Meta Data
-typedef struct LPoint
-{
+typedef struct LPoint {
 	int x;
 	int y;
 	int z;
@@ -248,23 +322,44 @@ typedef struct LPoint
 	unsigned char c;
 } LPoint_t;
 
-typedef struct MetaLaserHdl
-{
+typedef struct MetaLaserHdl {
 	int pts_count;
 	LPoint_t pts[HDL_MAX_POINT_NUMBER];
 } MetaLaserHdl_t;
 
 // Black-White(BW) Camera Meta Data
-typedef struct MetaCameraBW
-{
+typedef struct MetaCameraBW {
 	unsigned char mdata[BWCAM_IMAGE_SIZE];
 } MetaCameraBW_t;
 
 // Color(C) Camera Meta Data
-typedef struct MetaCameraC
-{
+typedef struct MetaCameraC {
 	unsigned char mdata[CCAM_IMAGE_SIZE];
 } MetaCameraC_t;
+
+
+// Metadata
+#define MAX_MMW_POINTS 64
+
+typedef struct mmw_pt {
+	int id;
+	float m_x, m_y;		// position
+	float m_velocity;
+	float m_angle;
+	float m_width;	// width
+	
+} mmw_pt_t;
+
+typedef struct MetaMMWPoints {
+	int num;		// valid mmw points number
+	mmw_pt_t mmw_pts[MAX_MMW_POINTS];
+} MetaMMWPoints_t;
+
+typedef struct MetaMap {
+	unsigned char p[2501][2501];
+	int x_offset,y_offset;
+	bool runmark;
+} MetaMap_t;
 
 // Hokuyo Meta Data
 //typedef struct MetaHokuyoPoints
@@ -314,10 +409,8 @@ typedef struct MetaCameraC
 //	double daVelocityYsigma[HOKUYO_MAX_OBJECTS]; // Standard deviation of value daVelocityY
 //
 //} MetaHokuyoObjects_t;
-typedef struct MetaData
-{
-	enum
-	{
+typedef struct MetaData {
+	enum {
 	    META_LASER_HDL      = 1,
 	    META_CAMERA_BW      = 2,
 	    META_CAMERA_C       = 3,
@@ -325,29 +418,42 @@ typedef struct MetaData
 	    META_LOCAL_NAVIGATION = 5,
 	    META_LUX_POINTS       = 6,
 	    META_LUX_OBJECTS    = 7,
+	    //META_BEFORE_RADR   = 8,
+	    //META_BACK_RADR_L   = 9,
+	    //META_BACK_RADR_R   = 10,
+	    META_MMW_POINTS    = 8,
+	    META_ROAD_POINTS       = 9,
+		//META_MAP 	= 10,
+	                             //META_ROAD_OBJECTS    = 13
+
 //	    META_HOKUYO_POINTS  = 7,
 //	    META_HOKUYO_OBJECTS = 8
 	} type;
-	union
-	{
+	union {
 		MetaNavigation_t v_navi;
 		MetaLocalNavigation_t v_navi_local;
 		MetaLaserHdl_t v_laserHdl;
 		MetaCameraBW_t v_cameraBW;
 		MetaCameraC v_cameraC;
-		MetaLUXPoints v_luxPts;
-		MetaLUXObjects v_luxObjs;
+		MetaLUXPoints v_luxPts;//
+		MetaLUXObjects v_luxObjs;//
+		//MetaBeforeRadr v_beforeRadr;
+		//MetaAfterRadrL v_afterRadrL;
+		//MetaAfterRadrR v_afterRadrR;
+		MetaMMWPoints v_mmwPts;//
+		MetaLUXPoints v_roadPts;//
+		//MetaMap_t v_map;
+		//MetaLUXObjects v_roadObjs;
+
 //		MetaHokuyoPoints_t v_hokuyoPts;
 //		MetaHokuyoObjects_t v_hokuyoObjs;
 	} value;
 	struct timeval timestamp;
-	MetaData()
-	{
+	MetaData() {
 		SetTimeStamp();
 	}
 	// set timestamp
-	void SetTimeStamp()
-	{
+	void SetTimeStamp() {
 		gettimeofday(&timestamp, NULL);
 	}
 } MetaData_t;
@@ -361,122 +467,107 @@ typedef struct MetaData
 //	double distance;
 //} RecoSpotLine_t;
 // stopline
-typedef struct RecoStopLine  // RecoType=RT_STOPLINE
-{
+typedef struct RecoStopLine { // RecoType=RT_STOPLINE
+	int mark;
 	double angle;
 	double distance;
+	double x,y;
 } RecoStopLine_t;
 
 // Traffic Light
-typedef struct RecoTrafficLight  // RecoType=RT_TRAFFICLIGHT
-{
-	enum TrafficLightType
-	{
+typedef struct RecoTrafficLight { // RecoType=RT_TRAFFICLIGHT
+	enum TrafficLightType {
 	    TRL_NONE   = 0,
 	    TRL_RED    = 1,
 	    TRL_YELLOW = 2,
 	    TRL_GREEN  = 3
 	} type;
+	/*enum TrafficLightArrow {
+		TRL_LEFT = 0,
+		TRL_RIGHT = 1,
+		TRL_CIRCLE = 2
+	} arrow;*/
 } RecoTrafficLight_t;
 
 // traffic sign 1
-typedef struct RecoTrafficSign  // RecoType=RT_TRAFFICSIGN
-{
-	enum
-	{
-	    TRS_NO_LEFT_TURN          = 1,
-	    TRS_NO_RIGHT_TURN         = 2,
-	    TRS_NO_PASS               = 3,
-	    TRS_NO_LEFT_RIGHT_TURN    = 4,
-	    TRS_NO_LEFT_PASS          = 5,
-	    TRS_NO_RIGHT_PASS         = 6,
-	    TRS_NO_ENTRY              = 7,
-	    TRS_STOP_AVOID            = 8,
-	    TRS_SPEED_DOWN            = 9,
-	    TRS_ATTENTION_PEDERSTRAIN = 10,
-	    TRS_ROAD_UNFLAT           = 11,
-	    TRS_EMERGENCY_STOP_AREA   = 12,
-	    TRS_STRAIGHT_FORWARD      = 13,
-	    TRS_LEFT_TURN             = 14,
-	    TRS_RIGHT_TURN            = 15,
-	    TRS_STRAIGHT_LEFT         = 16,
-	    TRS_STRAIGHT_RIGHT        = 17,
-	    TRS_LEFT_RIGHT            = 18,
-	    TRS_RIGHT_PASS            = 19,
-	    TRS_LEFT_PASS             = 20,
-	    TRS_HORN                  = 21,
-	    TRS_CIRCLE_DIRVE          = 22,
-	    TRS_PEDERSTRAIN_PATH      = 23,
-	    TRS_ALLOW_UTURN           = 24,
-	    TRS_PARKING_LOT           = 25,
-	    TRS_CONE_SIGN             = 26,
-	    TRS_DRIVE_TO_LEFT         = 27,
-	    TRS_DRIVE_TO_RIGHT        = 28,
-		TRS_SLOW_20				  = 29,
-		TRS_SLOW_DOWN              = 30,
-		TRS_RECOVER               = 31,
+typedef struct RecoTrafficSign { // RecoType=RT_TRAFFICSIGN
+	enum {
+	    TRS_LIM10          = 1,
+	    TRS_CANCLE10         = 1>>2,
+	    TRS_CHILD               = 1>>3,
+	    TRS_CROSSYELLOW    = 1>>4,
+	    TRS_CONSTRUCT          = 1>>5,
+	    TRS_STOP         = 1>>6,
+	    TRS_UTURN              = 1>>7,
 	    TRS_UNKNOWNSIGN           = 0
 	} type;
+	int result;
 	int position;
 } RecoTrafficSign_t;
 
 //// road tracking (ld&ad)
 //typedef struct RecoTrackLdAd   // RecoType=RT_TRACK_LDAD
 //{
-	//double ld;
-	//double ad;
-	//double lanewidth;
-	//double curbwidth;
-	//double curvature;
+//double ld;
+//double ad;
+//double lanewidth;
+//double curbwidth;
+//double curvature;
 //} RecoTrackLdAd_t;
 
-typedef struct RecoTrackLocalAndPreview   // RecoType=RT_TRACK_LOCALANDPREVIEW
-{
-      Pose_t localpt;
-      Pose_t previewpt;
+typedef struct RecoTrackLocalAndPreview { // RecoType=RT_TRACK_LOCALANDPREVIEW
+	Pose_t localpt;
+	Pose_t previewpt;
 	double lanewidth;
 	double curbwidth;
 	double curvature;
+	double curvature_valid;
 } RecoTrackLocalAndPreview_t;
 
 // lux car following & lane change
-typedef struct RecoSlowDown
-{
-	enum
-	{
+typedef struct RecoSlowDown {
+	enum {
 	    SL_NONE   = 0,
 	    SL_FOLLOW = 1,
-	    SL_CHANGE = 2
+	    SL_CHANGE = 2,
+	    SL_CHANGE_LEFT = 3,
+	    SL_CHANGE_RIGHT = 4,
+	    SL_CHANGE_OVER = 5
 	} state;
 	double dv;
 } RecoSlowDown_t;
 
 // emergcy
-typedef struct RecoEmergency
-{
+typedef struct RecoEmergency {
 	int level;
 } RecoEmergency_t;
 
 // obstacle detection
-typedef struct RecoSideObs
-{
+typedef struct RecoSideObs {
 	bool hasLeftObstacle;
 	bool hasRightObstacle;
 } RecoSideObs_t;
 
 
-typedef struct LaneModule
-{
+typedef struct LaneModule {
 	double x0,x1,x2,x3;
+	// y = 1.0/6 * x3*x^3 + 1.0/2 * x2*x^2 + x1*x + x0;
 	double w;
 	//lane change start set isLaneOver = false
 	//lane change over middle lane isLaneOver = true
-	bool isLaneOver; 
+	bool isLaneOver;
 } LaneModule_t;
 
+typedef struct LaneMark {
+	CvScalar lane;
+	// x = lane.val[0]*y^3 + lane.va[1]*y^2 + lane.val[2]*y + lane.val[3];
+	bool valid;
+	// 1 is ok,0 is not ok;
+} LaneMark_t;
+
 // lane mark detection
-typedef struct RecoLaneMark
-{
+typedef struct RecoLaneMark {
+	/*
 	Pose_t pt_left_preview;
 	Pose_t pt_right_preview;
 	Pose_t pt_center_preview;
@@ -488,22 +579,238 @@ typedef struct RecoLaneMark
 	double dist_left;
 	double dist_right;
 	double lane_width;
-	
 	LaneModule_t lane_module;
+	*/
+	Pose_t preview;
+	double belief;
+	double lanewidth;
+	CvPoint2D32f left[400];
+	CvPoint2D32f right[400];
+	LaneMark_t ll_v,l_v,r_v,rr_v;//vehicle
+	LaneMark_t ll_f,l_f,r_f,rr_f;//freeze
 } RecoLaneMark_t;
 
-typedef struct RecoSCurve
-{
+
+typedef struct RecoSCurve {
 	Pose_t pt_preview;
 	double curvature;
 	double belief;
 	double width;
 } RecoSCurve_t;
 
-typedef struct RecoData
-{
-	enum RecoDataType
-	{
+typedef struct RecoLaneChangeLaneMarks {
+	LaneMark_t ll,l,r,rr;
+} RecoLaneChangeLaneMarks_t;
+
+typedef struct RecoObjectLaneMarks {
+	LaneMark_t ll,l,r,rr;
+} RecoObjectLaneMarks_t;
+
+typedef struct RecoCross {
+	bool isvalid;
+	bool isFinish;
+	bool isStraight; // 1:straight 0:cross
+	Pose_t guidept;
+	Pose_t localpt;
+	Pose_t startpt;
+} RecoCross_t;
+typedef struct RecoUturn {
+	bool isvalid; // 1有效 0无效
+	Pose_t guidept;
+	Pose_t startpt;
+	Pose_t localpt;
+	bool isStraight; // 1:straight 0:uturn
+} RecoUturn_t;
+
+/*typedef struct object {
+	double dis;
+	double center_x, center_y;
+	double width;
+	double vx, vy;
+	int belief;
+} object_t;
+
+typedef struct RecoObjects {
+	object_t objOnCurLane_front;
+	object_t objOnLeftLane_front, objOnLeftLane_back;
+	object_t objOnRightLane_front, objOnRightLane_back;
+} RecoObjects_t;
+*/
+typedef struct RecoGoodHDL {
+	bool isGood;
+} RecoGoodHDL_t;
+
+typedef struct RecoPathPoints {
+	Pose_t pts[1024];
+	int num;
+} RecoPathPoints_t;
+/*
+typedef struct Object_2 {
+	double x,y;
+	double length,width;
+	double v_x,v_y;
+	double a_x,a_y;
+	int belief;
+} Object_2_t;
+typedef struct RecoObjects_2 {
+	unsigned int num;
+	Object_2 objs[64];
+} RecoObjects_2_t;
+ * */
+typedef struct RecoLocalPts{
+	int num;
+	enum  {
+		LocalPtsNum = 200
+	};
+	Pose_t pts[LocalPtsNum];
+} RecoLocalPts_t;
+typedef struct RecoGlobalPts{
+	int num;
+	enum{
+		NUM = 500
+	};
+	Pose_t pts[NUM];
+}RecoGlobalPts_t;
+
+typedef struct RecoPts{
+	bool valid;
+	int num;
+	enum{
+		NUM = 500
+	};
+	Pose_t pts[NUM];
+}RecoPts_t;
+
+/*
+typedef struct RecoFusionPts{
+	bool valid;
+	int num;
+	//int end;
+	enum{
+		NUM = 500
+	};
+	Pose_t pts[NUM];
+}RecoFusionPts_t;
+
+typedef struct RecoLanePts{
+	bool valid;
+	int num;
+	//int end;
+	enum{
+		NUM = 500
+	};
+	Pose_t pts[NUM];
+}RecoLanePts_t;
+
+typedef struct RecoHDLPts{
+	bool valid;
+	int num;
+	//int end;
+	enum{
+		NUM = 500
+	};
+	Pose_t pts[NUM];
+}RecoHDLPts_t;
+
+typedef struct RecoCurbPts{
+	bool valid;
+	int num;
+	//int end;
+	enum{
+		NUM = 500
+	};
+	Pose_t pts[NUM];
+}RecoCurbPts_t;
+*/
+typedef struct GridPos { 
+	int row, col;
+} GridPos_t;
+
+typedef struct Object {
+	bool IsMoving;
+	
+	int row, col;									//central grid
+	double x, y;									//central coordinate
+	int up_row, down_row, right_col, left_col;		//bounding box
+	double ymax, ymin, xmax, xmin;					//bounding box
+	
+	Pose_t edge[4];
+	
+	double vx, vy;									//velocity
+	double length, width;							//size
+	unsigned int belief;							//belief
+	int closest_row, closest_col;
+	double closest_x, closest_y;
+	
+	unsigned int occupy_num;						//occupied grid number
+	GridPos_t occupy_grid[MAX_OCCUPY_NUM];
+} Object_t;
+
+typedef struct Path{
+	double belief;
+	double s;
+	double x_u[6],y_u[6];
+	// x = x_u[5]*u^5 + x_u[4]*u^4 + ... + x_u[1]*u + x_u[0];
+	// y = y_u[5]*u^5 + y_u[4]&u^4 + ... + y_u[1]*u + y_u[0];
+	double s_pre;
+	Pose_t pt_pre;
+	double mc;
+	bool is_collided;
+	double dp;
+	//double thetab;
+} Path_t;
+
+typedef struct RecoCollide {
+	bool marker;	    // chen set 1,check for 0, xiao set 0
+	bool ob_activated; // chen pass
+	Path_t path_candidates[5][25];
+	
+	int startIndex;
+	
+	int globalpathNum;
+	Pose_t globalpath[5000];
+	
+} RecoCollide_t;
+
+typedef struct RecoVel {
+	double PlanningVel;
+} RecoVel_t;
+
+typedef struct RecoMapDBoundary {
+	bool valid;
+	Pose_t pt1,pt2;
+} RecoMapDBoundary_t;
+typedef struct RecoSubMapCheckList{
+	gridFXY_t left_down_grid;
+	int num;
+	enum{
+		NUM = 10000
+	};
+	Pose_t pts[NUM];
+} RecoSubMapCheckList_t;
+typedef struct Reco2LanePts{
+	bool lvalid;
+	int lnum;
+	//int end;
+	enum{
+		NUM = 500
+	};
+	Pose_t lpts[NUM];
+	bool rvalid;
+	int rnum;
+	Pose_t rpts[NUM];
+	bool svalid;
+	int snum;
+	Pose_t spts[NUM];
+}Reco2LanePts_t;
+
+typedef struct RecoSegmentPts{
+	bool seg_valid[6];
+	Pose_t seg_pts[24];
+}RecoSegmentPts_t;
+
+typedef struct RecoData {
+	enum RecoDataType {
 	    RT_STOPLINE     = 1,
 	    RT_TRAFFICSIGN  = 2,
 	    RT_TRAFFICLIGHT = 3,
@@ -511,39 +818,92 @@ typedef struct RecoData
 	    RT_SLOWDOWN     = 5,
 	    RT_EMERGENCY    = 6,
 	    RT_SIDEOBS      = 7,
-		RT_LANEMARK     = 8,
-		RT_CURB         = 9,
-		RT_RAIL         = 10,
-		RT_SCURVE       = 11,
-		RT_GUIDE_PT     = 12,
-		RT_TRACK_LOCALANDPREVIEW = 13,
-	    RT_MAX          = 14
+	    RT_LANEMARK     = 8,
+	    RT_CURB         = 9,
+	    RT_RAIL         = 10,
+	    RT_HDL_LANE		= 11,
+	    RT_GPS			= 12,
+	    RT_SCURVE       = 13,
+	    RT_GUIDE_PT     = 14,
+	    RT_TRACK_LOCALANDPREVIEW = 15,
+	    RT_LANECHANGE_LANEMARKS = 16,
+	    RT_OBJECT_LANEMARKS = 17,
+	    RT_CROSS		= 18,
+	    RT_UTURN		= 19,
+	    RT_GOODHDL		= 20,
+	    RT_PathPoints   = 21,
+		RT_LOCALPTS 	=22,
+		RT_GLOBALPTS 	= 23,
+		RT_COLLIDE		= 24,
+		RT_VEL	= 25,
+		RT_FUSION_PTS = 26,
+		RT_MAP_DBOUNDARY = 27,
+		RT_SUB_MAP = 28,
+		RT_OCCUPY_GRIDS = 29,
+		RT_OBSTACLE_LIST = 30,
+		RT_LANE_PTS = 31,
+		RT_HDL_PTS = 32,
+		RT_CURB_PTS = 33,
+		RT_SUBMAP_CHECKLIST = 34,
+		RT_2LANE_PTS 	= 35,
+		RT_SEGMENT_PTS 	= 36,
+	    RT_MAX          = 37
+
 	} type;
-	union RecoDataValue
-	{
+	union RecoDataValue {
 		RecoStopLine_t v_stopline;
 		RecoTrafficSign_t v_ts;
 		RecoTrafficLight_t v_tl;
 		//RecoTrackLdAd_t v_trackLdAd;
-		RecoSlowDown_t v_slowdown;
-		RecoEmergency_t v_emergency;
+		RecoSlowDown_t v_slowdown;//
+		RecoEmergency_t v_emergency;//
 		RecoSideObs_t v_sideObs;
 		RecoLaneMark_t v_lanemark;
 		RecoLaneMark_t v_curb;
 		RecoLaneMark_t v_rail;
+		RecoLaneMark_t v_hdl_lane;
+		RecoLaneMark_t v_gps;
 		RecoSCurve_t v_scurve;
 		Pose_t v_guide_pt;
 		RecoTrackLocalAndPreview_t v_trackLocalAndPreview;
+		RecoLaneChangeLaneMarks_t v_laneChange_lanemarks;
+		RecoObjectLaneMarks_t v_object_lanemarks;
+		//RecoBeforeRadr v_beforeRadr;
+		//RecoAfterRadrL v_afterRadrL;
+		//RecoAfterRadrR v_afterRadrR;
+		RecoCross_t v_cross;
+		RecoUturn_t v_uturn;
+		RecoGoodHDL_t v_goodhdl;
+		RecoPathPoints_t v_pathpoints;
+		//RecoObjects_2_t v_objects_2;
+		RecoLocalPts_t v_localpts;
+		RecoGlobalPts_t v_globalpts;
+		RecoCollide_t v_collide;
+		RecoVel_t v_vel;
+		//RecoFusionPts_t v_fusion_pts;
+		RecoPts_t v_fusion_pts;
+		RecoMapDBoundary_t v_map_dboundary;
+		RecoSubMap_t v_sub_map;
+		RecoOccupyGrids_t v_occupy_grids;
+		RecoObstacleList_t v_obstacle_list;
+		//RecoLanePts_t v_lane_pts;
+		//RecoHDLPts_t v_hdl_pts;
+		//RecoCurbPts_t v_curb_pts;
+		RecoPts_t v_lane_pts;
+		RecoPts_t v_hdl_pts;
+		RecoPts_t v_curb_pts;
+		RecoSubMapCheckList_t v_submap_checklist;
+		Reco2LanePts_t v_2lane_pts;
+		RecoSegmentPts_t v_segment_pts;
+		
 	} value;
 	struct timeval timestamp;
 	double belief;
-	RecoData()
-	{
+	RecoData() {
 		SetTimeStamp();
 	}
 	// set time stamp
-	void SetTimeStamp()
-	{
+	void SetTimeStamp() {
 		gettimeofday(&timestamp, NULL);
 	}
 } RecoData_t;
@@ -551,18 +911,55 @@ typedef struct RecoData
  * Shared Markers
  */
 // navigation marker
-typedef struct MarkerNavigation   // MarkerType=MARKER_NAVIGATION
-{
+typedef struct MarkerNavigation { // MarkerType=MARKER_NAVIGATION
 	int mark;
-	double distance;
-	double theta;
+	//int mapmark; // zhuch
+	//int runmark;
+	//int mark_refreeze;
+	//int mark_refreeze_lux;
+	//int mark_refreeze_hdl;
+	Pose_t pt;
 } MarkerNavi_t;
 
+// refreeze marker
+typedef struct MarkerRefreeze { // MarkerType=MARKER_NAVIGATION
+	int isRefreeze;
+} MarkerRefreeze_t;
+// cam lost marker
+typedef struct MarkerCamLost { // MarkerType=MARKER_NAVIGATION
+	int isCamLost;
+} MarkerCamLost_t;
+
 // intersection state: roadtracking <=> decision
-typedef struct MarkerIntersection
-{
-	bool isFinished;
-} MarkerIntersection_t;
+typedef struct MarkerBehavior {
+	double dis;
+	enum BehaviorType {
+	    BEHAVIOR_ROADTRACKING   = 1,
+	    BEHAVIOR_CROSS          = 2,
+	    BEHAVIOR_LANE_CHANGE    = 3,
+	    BEHAVIOR_STOPLINE_PAUSE = 4,
+	    BEHAVIOR_STOP_ZONE = 5,
+		BEHAVIOR_SIGN_SIDEWALK = 6,
+		BEHAVIOR_SIGN_CONSTRUCT = 7,
+		BEHAVIOR_SIGN_LIMIT10 = 8,
+		BEHAVIOR_SIGN_LIMIT10_CANCLE = 9,
+		BEHAVIOR_SIGN_STOP = 10,
+		BEHAVIOR_SIGN_SCHOOL = 11,
+		BEHAVIOR_SIGN_UTURN = 12,
+		BEHAVIOR_SIGN_FORBID = 13,
+		BEHAVIOR_SIGN_PARK = 14,
+		BEHAVIOR_SLOWDOWN = 15,
+		BEHAVIOR_FOLLOW = 16,
+	    BEHAVIOR_MAX            = 17
+	} Behavior;
+	enum BehaviorProperty {
+	    INTERSECTION_UNKNOWN = 0,
+	    INTERSECTION_LEFT    = 1,
+	    INTERSECTION_RIGHT   = 2,
+	    INTERSECTION_FORWARD = 3,
+	    INTERSECTION_UTURN   = 4
+	} Options;
+} MarkerBehavior_t;
 
 // taillight image: HDL => TailLight
 //typedef struct MarkerTaillightImage
@@ -579,8 +976,7 @@ typedef struct MarkerIntersection
 //	int level;
 //} MarkerObstacle_t;
 
-typedef struct MarkerObstacleLux
-{
+typedef struct MarkerObstacleLux {
 	int level;
 } MarkerObstacleLux_t;
 
@@ -599,110 +995,337 @@ typedef struct MarkerObstacleLux
 //	int flag; // 1 = slow down, 0 = do nothing
 //} MarkerVelocityDec_t;
 
-typedef struct MarkerVelocityDecLux
-{
+typedef struct MarkerVelocityDecLux {
 	double delta_v; // alway be no greater than 0
 	int flag; // 1 = slow down, 0 = do nothing
 } MarkerVelocityDecLux_t;
 
 // obstacle: track => obstacle
-typedef struct TrajectoryParabola
-{
+typedef struct TrajectoryClothoid {
 	double a;
 	double b;
 	double c;
+	double d;
 	bool valid;
-} TrajectoryParabola_t;
+	// x = a*y^3 + b*y^2 + c*y + d;
+} TrajectoryClothoid_t;
 
-typedef struct MarkerParabola
-{
-	TrajectoryParabola_t Parabola_left;
-	TrajectoryParabola_t Parabola_center;
-	TrajectoryParabola_t Parabola_right;
-	bool curvature;
+typedef struct MarkerClothoid {
+	TrajectoryClothoid_t trajectory[10];
+	double curvature;
+	CvScalar l_clothoid,r_clothoid;
+	CvScalar l_ugv,r_ugv;
 	bool valid;
-} MarkerParabola_t;
+} MarkerClothoid_t;
 
-typedef struct MarkerLaneChange
-{
-	enum LaneChangeState
-	{
+typedef struct MarkerLaneChange {
+	enum LaneChangeState {
 	    LCS_START    = 1,
 	    LCS_FINISHED = 2,
 	    LCS_RUNNING  = 3,
 	    LCS_FAILED   = 4
 	} state;
 
-	enum LaneChangeSide
-	{
+	enum LaneChangeSide {
 	    LC_LEFT    = 1,
 	    LC_RIGHT   = 2,
 	    LC_UNKNOWN = 3
 	} side;
 } MarkerLaneChange_t;
 
-typedef struct MarkerLaneChangeObstacle
-{
+typedef struct MarkerLaneChangeObstacle {
 	bool hasLeftObstacle;
 	bool hasRightObstacle;
 	double vLeft;
 	double vRight;
 } MarkerLaneChangeObstacle_t;
 
-typedef struct MarkerTrafficLight
-{
+typedef struct MarkerTrafficLight {
 	int TrafficLights[10][4];
 	int result_length;
 	unsigned char pattern[10][5400];
 } MarkerTrafficLight_t;
 
-typedef struct MarkerRoadTracking
-{
-	enum RoadTrackingState
-	{
-		RTS_NORMAL =       1,
-		RTS_LANECHANGE =   2,
-		RTS_INTERSECTION = 3
+typedef struct MarkerRoadTracking {
+	enum RoadTrackingState {
+	    RTS_NORMAL =       1,
+	    RTS_LANECHANGE =   2,
+	    RTS_INTERSECTION = 3
 	} state;
 } MarkerRoadTracking_t;
 
-typedef struct MarkerData
+typedef struct MarkerCameraTmp {
+	unsigned char mdata[4*400*600];
+} MarkerCameraTmp_t;
+
+typedef struct MarkerGoodHDL {
+	bool isGood;
+} MarkerGoodHDL_t;
+
+typedef struct MarkerCanLaneChange_t {
+	bool canLaneChange;
+} MarkerCanLaneChange_t;
+
+typedef struct MarkerLaneChangeOver_t {
+	bool isLaneChangeOver;
+} MarkerLaneChangeOver_t;
+typedef struct MarkerActivePoint {
+	int pre_num;
+	int pre_segment;
+	int pre_lane;
+	int pre_waypoint;
+	int pre_p1,pre_p2;
+	Pose_t pre_pt;
+	int num;
+	int segment;
+	int lane;
+	int waypoint;
+	int p1,p2;
+	Pose_t pt;
+	int next_num;
+	int next_segment;
+	int next_lane;
+	int next_waypoint;
+	int next_p1,next_p2;
+	Pose_t next_pt;
+} MarkerActivePoint_t;
+typedef struct MarkerNavStopline {
+	bool isupdate;
+} MarkerNavStopline_t;
+typedef struct MarkerRNDF {
+	void*     m_pData;
+	size_t    m_uSize;
+	int       m_nFile;
+} MarkerRNDF_t;
+typedef struct MarkerInSturn {
+	bool mark;
+	double dis;
+} MarkerInSturn_t;
+typedef struct MarkerSturnDec {
+	bool mark;
+} MarkerSturnDec_t;
+typedef struct MarkerDynamicObj {
+	bool hasobj;
+	double dis;
+	bool mark;
+} MarkerDynamicObj_t;
+
+typedef struct MarkerDynamicObjOver {
+	bool hasobj;
+} MarkerDynamicObjOver_t;
+
+typedef struct MarkerDevide {
+	bool mark;
+	int loadtype;
+} MarkerDevide_t;
+
+typedef struct MarkerIsUturn {
+	bool isuturn;
+} MarkerIsUturn_t;
+
+typedef struct MarkerStartObj {
+	bool mark;
+} MarkerStartObj_t;
+
+typedef struct MarkerGPSDone {
+	bool mark;
+} MarkerGPSDone_t;
+typedef struct MarkerDP {
+	bool mark;
+} MarkerDP_t;
+typedef struct MarkerOBJC
 {
-	enum MarkerDataType
-	{
+	// obj
+	bool isvalid;
+	enum OBJTYPE{
+		OBJ_UNKNOWN = 0,
+		OBJ_STOP = 1,
+		OBJ_MOVE = 2
+	}type;
+	double vel;				//速度
+	double dis;
+	
+	// obj slow down
+	int isSD;
+	double velSD;
+} MarkerOBJC_t;
+
+
+typedef struct MarkerChenX {
+	bool stop_obj_25;
+	bool curv;
+} MarkerChenX_t;
+
+typedef struct MarkerOBJClear {
+	bool mark;
+} MarkerOBJClear_t;
+
+typedef struct MarkerWangshy {
+	// 0 default gps & global
+	// 1 for fusion & HDL
+	// 2 for fusion & global
+	int mark;
+} MarkerWangshy_t;
+typedef struct MarkerControl {
+	double Angle;
+	double Target_acc; // brake
+	double AEB_dec; // emergency
+	int Torque;		// you men
+	int Angle_enable;
+	int Stop;
+} MarkerControl_t;
+typedef struct MarkerControllerRet {
+	/////message ESP_180,  steering angle , steering angle speed////////
+	double SAS_SteeringAngle;
+	double SAS_SteeringAngleSpeed;	
+	/////message ESP_208,  four wheels' speed and orientation////////	
+	double Wheel_Speed_RR_Data;  //right rear wheel speed 	
+	double Wheel_Speed_RL_Data;  //left rear wheel speed 	
+	int Wheel_Speed_FR_Direction; //right front wheel   direction 
+	double Wheel_Speed_FR_Data;	   //right front wheel speed	
+	int Wheel_Speed_FL_Direction;	//left front wheel direction
+	double Wheel_Speed_FL_Data;		//left front wheel speed 
+	/////message ESP_218,  Vehicle speed //////////////////////////	
+	double ESP_VehicleSpeed;    // Vehicle speed 
+	/////message ESP_278,  lateral accel, long accel, yaw rates////////
+	double ESP_LatAccel;	// lateral  acceleration
+	double ESP_LongAccel;	// long  acceleration
+	double ESP_YawRate;		// yaw  rate	
+} MarkerControllerRet_t;
+
+typedef struct MarkerData {
+	enum MarkerDataType {
 	    MARKER_NAVIGATION          = 1,
-	    MARKER_INTERSECTION        = 2,
+	    MARKER_BEHAVIOR       = 2,
 //	    MARKER_TAILLIGHT_IMAGE 	   = 3,
 //	    MARKER_HOKUYO_OBS          = 4,
 //	    MARKER_VELOCITY_DEC        = 5,
 	    MARKER_VELOCITY_DEC_LUX    = 3,
 	    MARKER_LANECHANGE          = 4,
-	    MARKER_PARABOLA            = 5,
+	    MARKER_CLOTHOID            = 5,
 	    MARKER_LANECHANGE_OBSTACLE = 6,
 //	    MARKER_LANECHANGE_SIDE     = 10,
 //	    MARKER_OBSTACLE            = 11,
 	    MARKER_OBSTACLE_LUX        = 7,
 	    MARKER_TL                  = 8,
-		MARKER_ROADTRACKING        = 9,
-	    MARKER_MAX                 = 10,
+	    MARKER_ROADTRACKING        = 9,
+	    MARKER_REFREEZE_CAM		   = 10,
+	    MARKER_REFREEZE_LUX		   = 11,
+	    MARKER_REFREEZE_HDL        = 12,
+	    MARKER_REFREEZE_HDLL   	   = 13,
+	    MARKER_CAM_LOST            = 14,
+	    MARKER_CAMERATMP            = 15,
+	    MARKER_GOODHDL				= 16,
+	    MARKER_CANLANECHANGE		= 17,
+	    MARKER_LANECHANGEOVER		= 18,
+	    MARKER_ACTIVEPOINT 		   = 19,
+	    MARKER_ACTIVEPOINTINRNDF 		   = 20,
+	    MARKER_ACTIVEPOINTINROUTE 		   = 21,
+	    MARKER_NAV_STOPLINE		   = 22,
+	    MARKER_RNDF				= 23,
+		MARKER_REFREEZE_MAP = 24,
+		MARKER_REFREEZE_OBJECT = 25,
+		MARKER_INSTURN = 26,
+		MARKER_STURN_DEC = 27,
+		MARKER_DYNAMIC_OBJ = 28,
+		MARKER_DYNAMIC_OBJ_1 = 29,
+		MARKER_DYNAMIC_OBJ_OVER = 30,
+		MARKER_DYNAMIC_OBJ_OVER_1 = 31,
+		MARKER_DEVIDE = 32,
+		MARKER_ISUTURN = 33,
+		MARKER_START_OBJ = 34,
+		//MARKER_OBACTIVATED		= 24,
+		MARKER_GPS_DONE = 35,
+		MARKER_DP = 36,
+		MARKER_OBJC = 37,
+		MARKER_CHENX = 38,
+		MARKER_OBJCLEAR = 39,
+		MARKER_WANGSHY = 40,
+		MARKER_CONTROL = 41,
+		MARKER_CONTROLLER_RET = 42,
+	    MARKER_MAX                 = 43
 	} type;
-	union
-	{
+	union {
 		MarkerNavi_t v_navi;
-		MarkerIntersection_t v_intersection;
+		MarkerBehavior_t v_behavior;
 //		MarkerTaillightImage_t v_taillightImage;
 //		MarkerHokuyoObs_t v_hokuyoobs;
 //		MarkerVelocityDec_t v_velocityDec;
 		MarkerVelocityDecLux_t v_velocityDecLux;
 		MarkerLaneChange_t v_lanechange;
-		MarkerParabola_t v_parabola;
+		MarkerClothoid_t v_clothoid;
 		MarkerLaneChangeObstacle_t v_lanechangeobstacle;
 //		MarkerLaneChangeSide_t v_lanechangeside;
 //		MarkerObstacle_t v_obstacle;
 		MarkerObstacleLux_t v_obstacleLux;
 		MarkerTrafficLight_t v_tl;
 		MarkerRoadTracking v_roadtracking;
+		MarkerRefreeze_t v_refreeze_cam;
+		MarkerRefreeze_t v_refreeze_lux;
+		MarkerRefreeze_t v_refreeze_hdl;
+		MarkerRefreeze_t v_refreeze_hdll;
+		MarkerCamLost_t v_cam_lost;
+		MarkerCameraTmp_t v_camera_tmp;
+		MarkerGoodHDL_t v_goodhdl;
+		MarkerCanLaneChange_t v_can_lanechange;
+		MarkerLaneChangeOver_t v_lanechange_over;
+		MarkerActivePoint_t v_activepoint;
+		MarkerActivePoint_t v_activepointinrndf;
+		MarkerActivePoint_t v_activepointinroute;
+		MarkerNavStopline_t v_nav_stopline;
+		MarkerRNDF_t v_rndf;
+		MarkerRefreeze_t v_refreeze_map;
+		MarkerRefreeze_t v_refreeze_object;
+		MarkerInSturn_t v_sturn; 
+		MarkerSturnDec_t v_sturndec;
+		MarkerDynamicObj_t v_dynamic_obj;
+		MarkerDynamicObj_t v_dynamic_obj_1;
+		MarkerDynamicObjOver_t v_dynamic_obj_over;
+		MarkerDynamicObjOver_t v_dynamic_obj_over_1;
+		MarkerDevide_t v_devide;
+		MarkerIsUturn_t v_isuturn;
+		MarkerStartObj_t v_start_obj;
+		MarkerGPSDone_t v_gps_done;
+		MarkerDP_t v_dp;
+		MarkerOBJC_t v_objc;
+		MarkerChenX_t v_chenx;
+		MarkerOBJClear_t v_objclear;
+		MarkerWangshy_t v_wangshy;
+		MarkerControl_t v_control;
+		MarkerControllerRet_t v_controller_ret;
+		//MarkerObActivated_t v_ob_activated;
 	} value;
 } MarkerData_t;
+
+typedef struct PointT {
+	int x,y;
+	bool operator < (const PointT &pt) const{
+	//	return x+y < pt.x+pt.y;
+		if(x!=pt.x)
+			return x<pt.x;
+		return y<pt.y;
+	
+	}
+} PointT_t;
+typedef struct Carpos{
+	int num;
+	PointT_t pts[200*5];
+}Carpos_t;
+typedef enum GridType {
+	Unknown = 0,
+    Car_track = 1,
+    Boundary = 2
+} GridType_t;
+typedef struct Grid {
+	//unsigned char p;
+	float p;
+	unsigned short delta_z;	
+	GridType_t gt;
+} Grid_t;
+typedef struct LocalMap {
+	Carpos_t carpos;
+	map <PointT_t, Grid_t> LocalGridMap;
+} LocalMap_t;
+
 }
 #endif // __TYPES_H_

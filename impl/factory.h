@@ -1,6 +1,6 @@
 #pragma once
 
-#include "shm.h"
+#include "shm_.h"
 
 using namespace module::shm;
 
@@ -31,6 +31,8 @@ private:
 
 	bool Initialize();
 	void Destroy();
+    bool initSems();
+    void destroySems();
 
 public:
 	static SharedObjectsFactory& GetInstance()

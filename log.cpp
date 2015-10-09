@@ -35,7 +35,7 @@ void Log::GetProcName()
 {
 	long maxPathLen = pathconf("/", _PC_PATH_MAX);
 	char* selfname = new char[maxPathLen];
-	memset(selfname, 0, sizeof(selfname));
+    memset(selfname, 0, maxPathLen);
 
 	if(readlink(SELF_FILE, selfname, maxPathLen) != -1)
 	{

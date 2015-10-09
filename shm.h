@@ -16,6 +16,18 @@ namespace shm
 // smart marker number
 #define SHM_SMART_MARKER_NUM 10
 
+//POSIX unnamed semaphore
+#define SEM_META_NUM 2 //add by Zou Lu
+/*
+ * following enum is used to index certain semaphore,
+ * don't use numbers to index into the sems array, use this enum instead.
+ * see actual implimentation in "Impl/ *"
+ */
+typedef enum {
+      NAVI_FOR_HDL = 0 //used to indicate hdl capturer that a new navi data is ready
+    , HDL_FOR_RECORDER = 1 //used to indicate hdl recorder that a new hdl data is ready
+} SEM_META_ID; //add by Zou Lu
+
 // SharedObject Class Definition
 class SharedObjects
 {

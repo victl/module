@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <signal.h>
 #include "log.h"
+#include <unistd.h>
 
 using namespace module::logger;
 
